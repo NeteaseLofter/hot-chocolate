@@ -6,16 +6,39 @@ export class Manager {
     [appName: string]: Application
   };
 
+  plugins: Plugin[];
+
 
   constructor (
     appsConfig: ApplicationConfig[],
     plugins: Plugin[] = []
   ) {
     this.apps = {};
+    this.plugins = plugins;
 
-    appsConfig.forEach((appConfig) => {
-      const app = new Application(appConfig, plugins);
-      this.apps[appConfig.name] = app;
+    this.resetApps(appsConfig);
+  }
+
+  updateApp (
+    appName: string,
+    appConfig: ApplicationConfig
+  ) {
+    if (this.apps[appName]) {
+      this.apps[appName].deactivateAll();
+    }
+
+    this.apps[appName] = new Application(appConfig, this.plugins);
+  }
+
+  resetApps (newAppsConfig: ApplicationConfig[]) {
+    const plugins = this.plugins;
+    Object.keys(this.apps).forEach((appName) => {
+      this.apps[appName].deactivateAll();
+      delete this.apps[appName];
+    });
+
+    newAppsConfig.forEach((appConfig) => {
+      this.apps[appConfig.name] = new Application(appConfig, plugins);
     })
   }
 
@@ -31,6 +54,12 @@ export class Manager {
       sandbox.mount(container);
     }
     return sandbox;
+  }
+
+  findOrActivate (appName: string) {
+    if (this.apps[appName]) {
+      return this.apps[appName].findOrActivate();
+    }
   }
 
   deactivateAll (appName?: string) {

@@ -52,6 +52,16 @@ export class Application {
     return newSandbox;
   }
 
+  findOrActivate () {
+    let sandbox;
+    if (this.activatedSandbox.length > 0) {
+      sandbox = this.activatedSandbox[0];
+    } else {
+      sandbox = this.activate();
+    }
+    return sandbox;
+  }
+
   removeActivatedSandbox (sandbox: Sandbox) {
     const index = this.activatedSandbox.findIndex((activatedSandbox) => (activatedSandbox === sandbox))
     if (index > -1) {

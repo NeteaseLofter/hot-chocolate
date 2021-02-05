@@ -27,6 +27,10 @@ test('custom', () => {
   expect(ObjectInSandbox).toBe(navigator);
 })
 
+test('findOrActivate can find', () => {
+  expect(app.findOrActivate()).toBe(sandbox1);
+});
+
 test('set attr on window is isolation', () => {
   (sandbox1.contentWindow as any).test = 'test';
   sandbox1.runCode('window.runCodeTest="test"');
