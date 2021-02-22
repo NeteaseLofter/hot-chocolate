@@ -44,11 +44,11 @@ const manager = new Manager([
   }
 ]);
 
-// 激活但不自动挂砸到文档流里
+// 激活但不自动挂载到文档流里
 // 适合一些提供 纯函数 但是不需要界面的内容
 const sandbox = manager.activate('app1');
 
-// 激活并自动挂砸到文档流里
+// 激活并自动挂载到文档流里
 // 适合同时会提供界面的内容
 const sandbox = manager.activateAndMount('app2', document.body);
 
