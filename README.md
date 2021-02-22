@@ -85,4 +85,4 @@ sandbox.ready().then(() => {
 ## 更多插件
 | 名字 | 功能 |
 |----|----|
-|[@hot-chocolate/plugin-request](https://www.npmjs.org/package/@hot-chocolate/plugin-request)| 拦截子应用中发出的AJAX请求 |
+|[@hot-chocolate/plugin-request](https://github.com/NeteaseLofter/hot-chocolate/tree/master/packages/plugin-request)| 拦截子应用中发出的AJAX请求 |
