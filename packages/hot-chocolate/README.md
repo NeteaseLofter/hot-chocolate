@@ -132,8 +132,13 @@ new Manager(
 )
 ```
 
-### 插件API
+### 插件 hooks API
+
+
 #### hooks.sandbox
+沙箱本身的一些生命周期。
+
+
 ##### hooks.sandbox.register('beforeInitialization')
 在sandbox 创建 window,document,dom之前被唤起。
 ```js
@@ -165,6 +170,9 @@ hooks.sandbox.register(
 
 
 #### hooks.window
+沙箱代理 window 对象的生命周期。
+
+
 ##### hooks.sandbox.register('has')
 针对 in 操作符的代理方法。
 参考[Proxy handler.has](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/has)
@@ -222,14 +230,21 @@ hooks.window.register(
 )
 ```
 
+
 #### hooks.document
+沙箱代理 document 对象的生命周期。
+
 
 ##### hooks.sandbox.register('has' ｜ 'get' | 'set', () => {})
 唤起时机为 document 的各种操作。
 回调格式和 window的 has|get|set 相同，只是 proxyWindow 替换为 proxyDocument, rawWindow 替换为 rawDocument
 
+
 #### hooks.shadowDom
+沙箱创建shadow dom及初始化内部DOM树的生命周期。
+
 [shadow dom 相关文档](https://developer.mozilla.org/zh-CN/docs/Web/Web_Components/Using_shadow_DOM)
+
 
 ##### hooks.shadowDom.register('initialization')
 在shadowDom完成初始dom创建后被唤起，此时js未加载和运行
