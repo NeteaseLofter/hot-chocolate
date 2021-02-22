@@ -4,18 +4,26 @@ import type { ProxyWindow } from './window';
 
 export interface DocumentHooks {
   document: Hook<{
-    initialization: {
-      args: [],
-      result: void
-    },
+    /**
+     * 针对 in 操作符的代理方法;
+     * 同 [Proxy handler.has](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/has)
+     */
     has: {
       args: [any, string | number | symbol, Document],
       result: boolean
     },
+    /**
+     * 用于拦截对象的读取属性操作;
+     * 同 [Proxy handler.get](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/get)
+     */
     get: {
       args: [any, string | number | symbol, ProxyDocument, Document],
       result: any
     },
+    /**
+     * 设置属性值操作的捕获器;
+     * 同 [Proxy handler.set](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/set)
+     */
     set: {
       args: [any, string | number | symbol, any, ProxyDocument, Document],
       result: boolean

@@ -131,3 +131,126 @@ new Manager(
   ]
 )
 ```
+
+### 插件API
+#### hooks.sandbox
+##### hooks.sandbox.register('beforeInitialization')
+在sandbox 创建 window,document,dom之前被唤起。
+```js
+hooks.sandbox.register(
+  'beforeInitialization',
+  (
+    end, // 通用的结束回调
+    sandbox // 创建sandbox实例，此时无contentWindow,parent等属性
+  ) => {}
+)
+```
+
+##### hooks.sandbox.register('initialization')
+参数同 **beforeInitialization**。
+在sandbox完成 window,document,dom创建后被唤起。
+
+##### hooks.sandbox.register('destroy')
+参数同 **beforeInitialization**。
+在sandbox 完成销毁后被唤起。
+
+##### hooks.sandbox.register('mount')
+参数同 **beforeInitialization**。
+在sandbox 执行 mount 完成挂载到页面后被唤起
+
+##### hooks.sandbox.register('unmount')
+参数同 **beforeInitialization**。
+在sandbox 执行 unmount 完成从文档流卸载后被唤起
+如果之前调用过 mount 完成挂载，那在执行 destroy 时也会被唤起
+
+
+#### hooks.window
+##### hooks.sandbox.register('has')
+针对 in 操作符的代理方法。
+参考[Proxy handler.has](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/has)
+
+```js
+hooks.window.register(
+  'has',
+  (
+    end, // 通用的结束回调
+    proxyWindow, // 被proxy代理的window, 沙箱中代码访问的内容
+    property, // 需要检查是否存在的属性
+    rawWindow // 原始的window对象
+  ) => {
+    return end(true); // 返回 true or false, 用于in的判断
+  }
+)
+```
+
+##### hooks.sandbox.register('get')
+用于拦截对象的读取属性操作。
+参考[Proxy handler.get](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/get)
+
+```js
+hooks.window.register(
+  'get',
+  (
+    end, // 通用的结束回调
+    proxyWindow, // 被proxy代理的window, 沙箱中代码访问的内容
+    property, // 被获取的属性名
+    receiver, // Proxy或者继承Proxy的对象，来自 Proxy
+    rawWindow // 原始的window对象
+  ) => {
+    return end(any); // 可以返回任何值，同 Proxy handler.get
+  }
+)
+```
+
+##### hooks.sandbox.register('set')
+设置属性值操作的捕获器。
+参考[Proxy handler.set](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/set)
+
+```js
+hooks.window.register(
+  'get',
+  (
+    end, // 通用的结束回调
+    proxyWindow, // 被proxy代理的window, 沙箱中代码访问的内容
+    property, // 被获取的属性名
+    value, // 新属性值
+    receiver, // Proxy或者继承Proxy的对象，来自 Proxy
+    rawWindow // 原始的window对象
+  ) => {
+    return end(true); // 应当返回一个布尔值，同 Proxy handler.set
+  }
+)
+```
+
+#### hooks.document
+
+##### hooks.sandbox.register('has' ｜ 'get' | 'set', () => {})
+唤起时机为 document 的各种操作。
+回调格式和 window的 has|get|set 相同，只是 proxyWindow 替换为 proxyDocument, rawWindow 替换为 rawDocument
+
+#### hooks.shadowDom
+[shadow dom 相关文档](https://developer.mozilla.org/zh-CN/docs/Web/Web_Components/Using_shadow_DOM)
+
+##### hooks.shadowDom.register('initialization')
+在shadowDom完成初始dom创建后被唤起，此时js未加载和运行
+```js
+hooks.sandbox.register(
+  'beforeInitialization',
+  (
+    end, // 通用的结束回调
+    shadowDomResult // shadowDom 创建结果
+  ) => {}
+)
+```
+
+shadowDomResult 详细内容
+```js
+shadowDomResult: {
+  parent: HTMLDivElement; // shadow dom的外层节点
+  shadowRoot: ShadowRoot; // shadow root: https://developer.mozilla.org/zh-CN/docs/Web/API/ShadowRoot
+  head: HTMLHeadElement; // shadow dom内部的 DOM 树里的 head节点
+  body: HTMLBodyElement; // shadow dom内部的 DOM 树里的 body节点
+  html: HTMLHtmlElement; // shadow dom内部的 DOM 树里的 html节点
+  htmlScripts: HtmlScript[]; // html中提取出来的需要加载的js内容
+}
+```

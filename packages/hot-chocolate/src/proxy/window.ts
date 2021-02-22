@@ -2,14 +2,26 @@ import { Hook } from '../core/hooks';
 
 export interface WindowHooks {
   window: Hook<{
+    /**
+     * 针对 in 操作符的代理方法;
+     * 同 [Proxy handler.has](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/has)
+     */
     has: {
       args: [any, string | number | symbol, Window],
       result: boolean
     },
+    /**
+     * 用于拦截对象的读取属性操作;
+     * 同 [Proxy handler.get](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/get)
+     */
     get: {
       args: [any, string | number | symbol, ProxyWindow, Window],
       result: any
     },
+    /**
+     * 设置属性值操作的捕获器;
+     * 同 [Proxy handler.set](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/set)
+     */
     set: {
       args: [any, string | number | symbol, any, ProxyWindow, Window],
       result: boolean

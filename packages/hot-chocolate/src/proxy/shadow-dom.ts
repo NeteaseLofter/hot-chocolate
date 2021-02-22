@@ -5,6 +5,9 @@ import type { ProxyDocument } from './document';
 
 export interface ShadowDomHooks {
   shadowDom: Hook<{
+    /**
+     * 在shadowDom完成初始dom创建后被唤起，此时js未加载和运行
+     */
     initialization: {
       args: [ShadowDomResult],
       result: ShadowDomResult
@@ -13,11 +16,29 @@ export interface ShadowDomHooks {
 }
 
 interface ShadowDomResult {
+  /**
+   * shadow dom的外层节点
+   */
   parent: HTMLDivElement;
+  /**
+   * shadow root: https://developer.mozilla.org/zh-CN/docs/Web/API/ShadowRoot
+   */
   shadowRoot: ShadowRoot;
+  /**
+   * shadow dom内部的 DOM 树里的 head节点
+   */
   head: HTMLHeadElement;
+  /**
+   * shadow dom内部的 DOM 树里的 body节点
+   */
   body: HTMLBodyElement;
+  /**
+   * shadow dom内部的 DOM 树里的 html节点
+   */
   html: HTMLHtmlElement;
+  /**
+   * html中提取出来的需要加载的js内容
+   */
   htmlScripts: HtmlScript[];
 }
 

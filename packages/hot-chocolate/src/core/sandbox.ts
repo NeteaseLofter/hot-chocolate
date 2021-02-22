@@ -10,22 +10,38 @@ import { loadScriptAsText } from '../utils/loader';
 
 export interface SandboxHooks extends ShadowDomHooks, DocumentHooks, WindowHooks {
   sandbox: Hook<{
+    /**
+     * 在sandbox 创建 window,document,dom之前被唤起
+     */
     beforeInitialization: {
       args: [Sandbox],
       result: void
     },
+    /**
+     * 在sandbox完成 window,document,dom创建后被唤起
+     */
     initialization: {
       args: [Sandbox],
       result: void
     },
+    /**
+     * 在sandbox 完成销毁后被唤起
+     */
     destroy: {
       args: [Sandbox],
       result: void
     },
+    /**
+     * 在sandbox 执行 mount 完成挂载到页面后被唤起
+     */
     mount: {
       args: [Sandbox],
       result: void
     },
+    /**
+     * 在sandbox 执行 unmount 完成从文档流卸载后被唤起
+     * 如果之前调用过 mount 完成挂载，那在执行 destroy 时也会被唤起
+     */
     unmount: {
       args: [Sandbox],
       result: void
