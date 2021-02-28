@@ -125,10 +125,12 @@ class FakeScript extends HTMLElement {
     this._tryLoadScript();
   }
 }
-customElements.define('sandbox-fake-script', FakeScript);
+
+const fakeScriptName = `sandbox-fake-script-${Math.floor(Math.random() * 1E9)}`;
+customElements.define(fakeScriptName, FakeScript);
 
 function createFakeScript (loadAndRunCode: loadAndRunCode) {
-  let fakeScript = document.createElement('sandbox-fake-script') as FakeScript;
+  let fakeScript = document.createElement(fakeScriptName) as FakeScript;
   fakeScript.loadAndRunCode = loadAndRunCode;
 
   return fakeScript;
