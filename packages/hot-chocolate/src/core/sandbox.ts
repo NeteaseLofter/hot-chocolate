@@ -212,9 +212,14 @@ export class Sandbox {
   getRemoteURLWithHtmlRoot (remoteUrl: string) {
     if (
       this.htmlRoot
-      && remoteUrl.indexOf('/') === 0
     ) {
-      return this.htmlRoot + remoteUrl;
+      if (remoteUrl.indexOf('/') === 0) {
+        return this.htmlRoot + remoteUrl;
+      }
+
+      if (remoteUrl.indexOf(window.location.origin) === 0) {
+        return this.htmlRoot + remoteUrl.slice(window.location.origin.length);
+      }
     }
     return remoteUrl;
   }

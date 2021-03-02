@@ -65,6 +65,8 @@ SandboxOptions: {
    *
    * 2. 设置 htmlRoot 为: 'http://xyz.com/static'
    * 则加载的js路径为 http://xyz.com/static/my.js
+   *
+   * 重要：该功能属于实验性功能，可能会修改
    */
   htmlRoot: 'http://abc.com/static',
 
