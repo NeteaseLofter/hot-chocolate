@@ -3,6 +3,8 @@ import { Hook } from '../core/hooks';
 import type { ProxyWindow } from './window';
 import type { ProxyDocument } from './document';
 
+import { loadRemoteAsText } from '../utils/loader';
+
 export interface ShadowDomHooks {
   shadowDom: Hook<{
     /**
@@ -37,9 +39,14 @@ interface ShadowDomResult {
    */
   html: HTMLHtmlElement;
   /**
-   * html中提取出来的需要加载的js内容
+   * html中提取出来的内容
    */
-  htmlScripts: HtmlScript[];
+  readyPromise: Promise<
+    Pick<
+      ReturnType<typeof parserHTMLString>,
+      Exclude<keyof ReturnType<typeof parserHTMLString>, 'defaultDom'>
+    >
+  >;
 }
 
 interface LocalHtmlScript {
@@ -52,26 +59,17 @@ interface RemoteHtmlScript {
 }
 
 export type HtmlScript = LocalHtmlScript|RemoteHtmlScript;
+export type HtmlLink = {
+  url: string
+}
 
-export function createShadowDom (
-  hooks: ShadowDomHooks,
-  proxyWindow: ProxyWindow,
-  proxyDocument: ProxyDocument,
-  htmlStr?: string
-): ShadowDomResult {
-  const parent = document.createElement('div');
-  const shadowRoot = parent.attachShadow({ mode: 'open' });
-  parent.style.position = 'relative';
-  parent.style.overflow = 'hidden';
-  parent.style.width = '100%';
-  parent.style.height = '100%';
-
+export function parserHTMLString (htmlString: string) {
+  const domParser = new DOMParser();
   let htmlScripts: HtmlScript[] = [];
+  let htmlCSSLinks: HtmlLink[] = [];
+  let defaultDom: Document;
 
-  let defaultDom: Document|null = null;
-  if (htmlStr) {
-    const domParser = new DOMParser();
-    defaultDom = domParser.parseFromString(htmlStr, 'text/html');
+  defaultDom = domParser.parseFromString(htmlString, 'text/html');
     const scriptNodes = defaultDom.getElementsByTagName('script');
     (Array.prototype.slice.call(scriptNodes, 0) as HTMLScriptElement[])
       .forEach((scriptElement) => {
@@ -91,7 +89,36 @@ export function createShadowDom (
           scriptElement.parentNode.removeChild(scriptElement);
         }
       })
+
+    const cssLinkNodes = defaultDom.querySelectorAll('link[rel=stylesheet]');
+    (Array.prototype.slice.call(cssLinkNodes, 0) as HTMLLinkElement[])
+      .forEach((linkElement) => {
+        htmlCSSLinks.push({ url: linkElement.href });
+        if (linkElement.parentNode) {
+          linkElement.parentNode.removeChild(linkElement);
+        }
+      })
+  return {
+    defaultDom,
+    htmlScripts,
+    htmlCSSLinks
   }
+}
+
+export function createShadowDom (
+  hooks: ShadowDomHooks,
+  proxyWindow: ProxyWindow,
+  proxyDocument: ProxyDocument,
+  htmlString?: string,
+  htmlRemote?: string,
+): ShadowDomResult {
+  const parent = document.createElement('div');
+  const shadowRoot = parent.attachShadow({ mode: 'open' });
+  parent.style.position = 'relative';
+  parent.style.overflow = 'hidden';
+  parent.style.width = '100%';
+  parent.style.height = '100%';
+
 
 
   const fakeHTML = proxyDocument.createElement('html');
@@ -100,37 +127,65 @@ export function createShadowDom (
   fakeHTML.appendChild(fakeHead);
   fakeHTML.appendChild(fakeBody);
   shadowRoot.appendChild(fakeHTML);
-  if (defaultDom) {
-    fakeBody.innerHTML = defaultDom.body.innerHTML;
-    // fakeHead.innerHTML = defaultDom.head.innerHTML;
-    Reflect.set(Object.getPrototypeOf(fakeHead), 'innerHTML', defaultDom.head.innerHTML, fakeHead);
+
+  // 使用 htmlRemote，htmlString 将不再生效
+
+  const parserHTML = async () => {
+    if (htmlRemote) {
+      const remoteHtmlText = await loadRemoteAsText(htmlRemote);
+      return parserHTMLString(remoteHtmlText);
+    } else if (htmlString) {
+      return parserHTMLString(htmlString);
+    }
+
+    return {
+      defaultDom: null,
+      htmlScripts: [],
+      htmlCSSLinks: []
+    }
   }
 
-  const initStyle = proxyDocument.createElement('style');
-  initStyle.innerHTML = `
-    html,body {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
+
+  const initHTML = async () => {
+    const {
+      defaultDom,
+      ...other
+    } = await parserHTML();
+
+    if (defaultDom) {
+      fakeBody.innerHTML = defaultDom.body.innerHTML;
+      // fakeHead.innerHTML = defaultDom.head.innerHTML;
+      Reflect.set(Object.getPrototypeOf(fakeHead), 'innerHTML', defaultDom.head.innerHTML, fakeHead);
     }
-    table {
-      font-size: inherit;
-      white-space: inherit;
-      line-height: inherit;
-      font-weight: inherit;
-      font-size: inherit;
-      font-style: inherit;
-      text-align: inherit;
-      border-spacing: inherit;
-      font-variant: inherit;
+
+    const initStyle = proxyDocument.createElement('style');
+    initStyle.innerHTML = (`html,body {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+      }
+      table {
+        font-size: inherit;
+        white-space: inherit;
+        line-height: inherit;
+        font-weight: inherit;
+        font-size: inherit;
+        font-style: inherit;
+        text-align: inherit;
+        border-spacing: inherit;
+        font-variant: inherit;
+      }
+    `).replace(/\s/g, '');
+    if (fakeHead.firstChild) {
+      fakeHead.insertBefore(initStyle, fakeHead.firstChild);
+    } else {
+      fakeHead.appendChild(initStyle);
     }
-  `;
-  if (fakeHead.firstChild) {
-    fakeHead.insertBefore(initStyle, fakeHead.firstChild);
-  } else {
-    fakeHead.appendChild(initStyle);
+
+    return other;
   }
+
 
   const data = {
     parent,
@@ -138,7 +193,7 @@ export function createShadowDom (
     head: fakeHead,
     body: fakeBody,
     html: fakeHTML,
-    htmlScripts: htmlScripts
+    readyPromise: initHTML()
   };
   const { isEnd, result } = hooks.shadowDom.evoke('initialization', data)
   return isEnd ? result : data;

@@ -1,12 +1,12 @@
 import type { Hook } from './hooks';
 
-import { createShadowDom } from '../proxy/shadow-dom';
+import { createShadowDom, parserHTMLString } from '../proxy/shadow-dom';
 import type { ShadowDomHooks, HtmlScript } from '../proxy/shadow-dom';
 import { createDocument } from '../proxy/document';
 import type { DocumentHooks } from '../proxy/document';
 import { createContentWindow } from '../proxy/window';
 import type { WindowHooks, ProxyWindow } from '../proxy/window';
-import { loadScriptAsText } from '../utils/loader';
+import { loadScriptAsText, loadRemoteAsText } from '../utils/loader';
 
 export interface SandboxHooks extends ShadowDomHooks, DocumentHooks, WindowHooks {
   sandbox: Hook<{
@@ -21,6 +21,13 @@ export interface SandboxHooks extends ShadowDomHooks, DocumentHooks, WindowHooks
      * 在sandbox完成 window,document,dom创建后被唤起
      */
     initialization: {
+      args: [Sandbox],
+      result: void
+    },
+    /**
+     * 在sandbox完成 初始化的 html、js、css加载后被唤起
+     */
+    ready: {
       args: [Sandbox],
       result: void
     },
@@ -51,7 +58,36 @@ export interface SandboxHooks extends ShadowDomHooks, DocumentHooks, WindowHooks
 }
 
 export interface SandboxOptions {
-  htmlString?: string
+  /**
+   * html string
+   * `
+   * <html><body>xxx</body></html>
+   * `
+   */
+  htmlString?: string,
+
+  /**
+   * 远程的 html url， 比如 http://xxx.com/index.html
+   * 注意跨域问题
+   */
+  htmlRemote?: string,
+
+  /**
+   * 加载相对路径的js、css资源时的路径
+   * 比如：
+   * 当前 页面url为： http://abc.com/index.html
+   * 加载js为： <script src="/my.js"></script>
+   * 1. 未设置 htmlRoot:
+   * 则加载的js路径为 http://abc.com/my.js
+   *
+   * 2. 设置 htmlRoot 为: 'http://xyz.com/static'
+   * 则加载的js路径为 http://xyz.com/static/my.js
+   */
+  htmlRoot?: string,
+
+  /**
+   * 额外的js,css资源
+   */
   resource?: {
     js: string[],
     css: string[]
@@ -69,6 +105,7 @@ export class Sandbox {
   hooks: SandboxHooks;
   contentWindow: ProxyWindow;
   readyPromise: Promise<void>;
+  htmlRoot?: string;
   onDestroy?: () => void;
 
   runCode: (js: string, scriptSrc?: string | undefined) => any;
@@ -77,12 +114,15 @@ export class Sandbox {
     hooks: SandboxHooks,
     {
       htmlString,
+      htmlRemote,
+      htmlRoot,
       resource,
       onDestroy
     }: SandboxOptions = {}
   ) {
     this.hooks = hooks;
     this.onDestroy = onDestroy;
+    this.htmlRoot = htmlRoot;
 
     this.hooks.sandbox.evoke('beforeInitialization', this);
 
@@ -111,12 +151,13 @@ export class Sandbox {
       html,
       body,
       head,
-      htmlScripts
+      readyPromise
     } = createShadowDom(
       hooks,
       proxyWindow,
       proxyDocument,
-      htmlString
+      htmlString,
+      htmlRemote
     );
     this.parent = parent;
     this.shadowRoot = shadowRoot;
@@ -126,8 +167,10 @@ export class Sandbox {
 
     this.hooks.sandbox.evoke('initialization', this);
 
-    this.readyPromise = (async () => {
+    this.readyPromise = new Promise(async (resolve) => {
+      const { htmlScripts, htmlCSSLinks } = await readyPromise;
       const exCSSResources = [
+        ...htmlCSSLinks,
         ...(
           resource && resource.css
             ? resource.css.map((css) => ({
@@ -156,18 +199,33 @@ export class Sandbox {
       for (let i = 0; i < exJSResources.length; i++) {
         await this.loadAndRunCode(exJSResources[i]);
       }
-    })();
+
+      this.hooks.sandbox.evoke('ready', this);
+      resolve();
+    });
   }
 
   ready () {
     return this.readyPromise;
   }
 
+  getRemoteURLWithHtmlRoot (remoteUrl: string) {
+    if (
+      this.htmlRoot
+      && remoteUrl.indexOf('/') === 0
+    ) {
+      return this.htmlRoot + remoteUrl;
+    }
+    return remoteUrl;
+  }
+
   loadRemoteCSS (cssUrl: string) {
+    cssUrl = this.getRemoteURLWithHtmlRoot(cssUrl);
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = cssUrl;
     this.contentWindow.document.head.appendChild(link);
+    return link;
   }
 
   loadAndRunCode (script: HtmlScript, callback?: () => void) {
@@ -179,6 +237,7 @@ export class Sandbox {
   }
 
   runRemoteCode (remoteScriptUrl: string, callback?: () => void) {
+    remoteScriptUrl = this.getRemoteURLWithHtmlRoot(remoteScriptUrl);
     return loadScriptAsText(remoteScriptUrl)
       .then((scriptString) => {
         this.runCode(scriptString, remoteScriptUrl);

@@ -1,7 +1,7 @@
 import type { SandboxHooks, Sandbox } from '../core/sandbox';
 import type { DocumentHooks, ProxyDocument } from '../proxy/document';
 
-type loadAndRunCode = Sandbox['loadAndRunCode'];
+type LoadAndRunCode = Sandbox['loadAndRunCode'];
 
 export function createElementPlugin (hooks: SandboxHooks) {
   let currentSandbox: Sandbox;
@@ -89,7 +89,7 @@ function modifyElementNode (element: Element, proxyDocument: ProxyDocument) {
 class FakeScript extends HTMLElement {
   src?: string;
   mounted: boolean = false;
-  loadAndRunCode!: loadAndRunCode;
+  loadAndRunCode!: LoadAndRunCode;
 
   constructor() {
     super()
@@ -129,7 +129,7 @@ class FakeScript extends HTMLElement {
 const fakeScriptName = `sandbox-fake-script-${Math.floor(Math.random() * 1E9)}`;
 customElements.define(fakeScriptName, FakeScript);
 
-function createFakeScript (loadAndRunCode: loadAndRunCode) {
+function createFakeScript (loadAndRunCode: LoadAndRunCode) {
   let fakeScript = document.createElement(fakeScriptName) as FakeScript;
   fakeScript.loadAndRunCode = loadAndRunCode;
 
