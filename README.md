@@ -19,8 +19,9 @@ const manager = new Manager([
   {
     name: 'app1', // 子应用的名字，必须保证不重复
     sandboxOptions: {
-      // 子应用运行的沙箱配置
-      htmlString: `<html><body><div id="root"></div><script src="app1.js"></script></body></html>`
+      // 通过 url 配置沙箱默认html
+      // 假设http://abc.com/index.html 返回如下html: `<html><body><div id="root"></div><script src="http://abc.com/app1.js"></script></body></html>`
+      htmlRemote: 'http://abc.com/index.html'
     }
   },
   {

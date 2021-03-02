@@ -47,8 +47,32 @@ new Manager(
 #### sandboxOptions
 ```js
 SandboxOptions: {
-  // 初始化时沙箱中生成的HTML
-  // 和一般的html一致即可
+  /**
+   * 通过直接请求远程url拿到 html 的方式加载html
+   * 注意跨域问题
+   * 和 htmlRemote 只能选择其中一个
+   */
+  htmlRemote: 'http://abc.com/index.html',
+
+  /**
+   * htmlRemote 中 加载相对路径的js、css资源时的路径
+   * 比如：
+   * 当前页面url(浏览器显示的)为： http://abc.com/index.html
+   * 加载js为： <script src="/my.js"></script>
+   *
+   * 1. 未设置 htmlRoot:
+   * 则加载的js路径为 http://abc.com/my.js
+   *
+   * 2. 设置 htmlRoot 为: 'http://xyz.com/static'
+   * 则加载的js路径为 http://xyz.com/static/my.js
+   */
+  htmlRoot: 'http://abc.com/static',
+
+  /**
+   * 初始化时沙箱中生成的HTML
+   * 和一般的html一致即可
+   * 和 htmlRemote 只能选择其中一个
+   */
   htmlString: `
     <html>
       <head>
@@ -66,14 +90,18 @@ SandboxOptions: {
       </body>
     </html>`,
 
-  // 可选，初始化HTML后，额外补充的JS
-  // 也可以使用 htmlString: '<html><body><script src="your-script.js"></script></body></html>'代替
+  /**
+   * 可选，初始化HTML后，额外补充的JS
+   * 也可以使用 htmlString: '<html><body><script src="your-script.js"></script></body></html>'代替
+   */
   js: [
     'your-script.js'
   ],
 
-  // 可选，初始化HTML后，额外补充的CSS
-  // 也可以使用 htmlString: '<html><head><link href="your-style.css" rel="stylesheet" /></head></html>'代替
+  /**
+   * 可选，初始化HTML后，额外补充的CSS
+   * 也可以使用 htmlString: '<html><head><link href="your-style.css" rel="stylesheet" /></head></html>'代替
+   */
   css: [
     'your-style.css'
   ]
