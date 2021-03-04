@@ -145,6 +145,16 @@ function createFakeScriptElement (loadAndRunCode: LoadAndRunCode) {
   return fakeScript;
 }
 
+function modifyElementAttribute (element: HTMLElement, name: string, newValue: string|boolean|null) {
+  if (newValue === null) {
+    element.removeAttribute(name);
+  } else if (typeof newValue === 'boolean') {
+    element.setAttribute(name, '');
+  } else {
+    element.setAttribute(name, newValue);
+  }
+}
+
 class FakeLinkElement extends HTMLElement {
   getRemoteURLWithHtmlRoot!: Sandbox["getRemoteURLWithHtmlRoot"];
   mounted = false;
@@ -162,7 +172,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   set as (newValue) {
-    this.setAttribute('as', newValue);
+    modifyElementAttribute(this, 'as', newValue);
   }
 
   get crossOrigin () {
@@ -170,7 +180,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   set crossOrigin (newValue) {
-    this.setAttribute('crossorigin', newValue);
+    modifyElementAttribute(this, 'crossorigin', newValue);
   }
 
   get disabled () {
@@ -178,7 +188,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   set disabled (newValue) {
-    this.setAttribute('disabled', newValue);
+    modifyElementAttribute(this, 'disabled', newValue);
   }
 
   get href () {
@@ -186,7 +196,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   set href (newValue) {
-    this.setAttribute('href', newValue);
+    modifyElementAttribute(this, 'href', newValue);
   }
 
   get hreflang () {
@@ -194,7 +204,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   set hreflang (newValue) {
-    this.setAttribute('hreflang', newValue);
+    modifyElementAttribute(this, 'crossorigin', newValue);
   }
 
   get media () {
@@ -202,7 +212,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   set media (newValue) {
-    this.setAttribute('media', newValue);
+    modifyElementAttribute(this, 'media', newValue);
   }
 
   get rel () {
@@ -210,7 +220,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   set rel (newValue) {
-    this.setAttribute('rel', newValue);
+    modifyElementAttribute(this, 'rel', newValue);
   }
 
   get sizes () {
@@ -222,11 +232,11 @@ class FakeLinkElement extends HTMLElement {
   }
 
   get type () {
-    return this.getAttribute('type') || '';
+    return this.realLink.type;
   }
 
   set type (newValue) {
-    this.setAttribute('type', newValue);
+    modifyElementAttribute(this, 'type', newValue);
   }
 
   setAttribute (name: string, value: string) {
@@ -235,6 +245,11 @@ class FakeLinkElement extends HTMLElement {
     }
     super.setAttribute.call(this, name, value);
     this.realLink.setAttribute(name, value);
+  }
+
+  removeAttribute (name: string) {
+    super.removeAttribute.call(this, name);
+    this.realLink.removeAttribute(name);
   }
 
   __appendRealLink () {
