@@ -13,8 +13,12 @@ export function createElementPlugin (hooks: SandboxHooks) {
       return end((type: string, ...args: any) => {
         let element;
         if (type === 'script') {
-          element = createFakeScript(
+          element = createFakeScriptElement(
             currentSandbox.loadAndRunCode.bind(currentSandbox)
+          );
+        } if (type === 'link') {
+          element = createFakeLinkElement(
+            currentSandbox.getRemoteURLWithHtmlRoot.bind(currentSandbox)
           );
         } else {
           element = document.createElement(type, ...args);
@@ -29,8 +33,12 @@ export function createElementPlugin (hooks: SandboxHooks) {
       return end((namespaceURI: string, type: string, ...args: any) => {
         let element;
         if (type === 'script') {
-          element = createFakeScript(
+          element = createFakeScriptElement(
             currentSandbox.loadAndRunCode.bind(currentSandbox)
+          );
+        } if (type === 'link') {
+          element = createFakeLinkElement(
+            currentSandbox.getRemoteURLWithHtmlRoot.bind(currentSandbox)
           );
         } else {
           element = document.createElementNS(namespaceURI, type, ...args);
@@ -86,7 +94,7 @@ function modifyElementNode (element: Element, proxyDocument: ProxyDocument) {
   });
 }
 
-class FakeScript extends HTMLElement {
+class FakeScriptElement extends HTMLElement {
   src?: string;
   mounted: boolean = false;
   loadAndRunCode!: LoadAndRunCode;
@@ -96,9 +104,10 @@ class FakeScript extends HTMLElement {
   }
 
   private _tryLoadScript () {
-    const src = this.src;
+    const src = this.src || this.getAttribute('src');
     const _self = this;
     if (src) {
+      this.setAttribute('for-src', src);
       this.loadAndRunCode(
         {
           type: 'remote',
@@ -127,11 +136,129 @@ class FakeScript extends HTMLElement {
 }
 
 const fakeScriptName = `sandbox-fake-script-${Math.floor(Math.random() * 1E9)}`;
-customElements.define(fakeScriptName, FakeScript);
+customElements.define(fakeScriptName, FakeScriptElement);
 
-function createFakeScript (loadAndRunCode: LoadAndRunCode) {
-  let fakeScript = document.createElement(fakeScriptName) as FakeScript;
+function createFakeScriptElement (loadAndRunCode: LoadAndRunCode) {
+  let fakeScript = document.createElement(fakeScriptName) as FakeScriptElement;
   fakeScript.loadAndRunCode = loadAndRunCode;
 
   return fakeScript;
+}
+
+class FakeLinkElement extends HTMLElement {
+  getRemoteURLWithHtmlRoot!: Sandbox["getRemoteURLWithHtmlRoot"];
+  mounted = false;
+
+  realLink = document.createElement('link');
+
+  constructor() {
+    super()
+  }
+
+  // DOMString 穷举 兼容 link 节点操作
+  // 参考于：https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLLinkElement
+  get as () {
+    return this.realLink.as;
+  }
+
+  set as (newValue) {
+    this.setAttribute('as', newValue);
+  }
+
+  get crossOrigin () {
+    return this.realLink.crossOrigin;
+  }
+
+  set crossOrigin (newValue) {
+    this.setAttribute('crossorigin', newValue);
+  }
+
+  get disabled () {
+    return this.realLink.disabled;
+  }
+
+  set disabled (newValue) {
+    this.setAttribute('disabled', newValue);
+  }
+
+  get href () {
+    return this.realLink.href;
+  }
+
+  set href (newValue) {
+    this.setAttribute('href', newValue);
+  }
+
+  get hreflang () {
+    return this.realLink.hreflang;
+  }
+
+  set hreflang (newValue) {
+    this.setAttribute('hreflang', newValue);
+  }
+
+  get media () {
+    return this.realLink.media;
+  }
+
+  set media (newValue) {
+    this.setAttribute('media', newValue);
+  }
+
+  get rel () {
+    return this.realLink.rel;
+  }
+
+  set rel (newValue) {
+    this.setAttribute('rel', newValue);
+  }
+
+  get sizes () {
+    return this.realLink.sizes;
+  }
+
+  get sheet () {
+    return this.realLink.sheet;
+  }
+
+  get type () {
+    return this.getAttribute('type') || '';
+  }
+
+  set type (newValue) {
+    this.setAttribute('type', newValue);
+  }
+
+  setAttribute (name: string, value: string) {
+    if (name === 'href') {
+      value = this.getRemoteURLWithHtmlRoot(value);
+    }
+    super.setAttribute.call(this, name, value);
+    this.realLink.setAttribute(name, value);
+  }
+
+  __appendRealLink () {
+    this.parentNode?.insertBefore(
+      this.realLink,
+      this
+    );
+  }
+
+  disconnectedCallback () {
+    this.mounted = false;
+    this.realLink.parentNode?.removeChild(this.realLink)
+  }
+  connectedCallback () {
+    this.mounted = true;
+    this.__appendRealLink();
+  }
+}
+
+const fakeLinkName = `sandbox-fake-link-${Math.floor(Math.random() * 1E9)}`;
+customElements.define(fakeLinkName, FakeLinkElement);
+
+function createFakeLinkElement (getRemoteURLWithHtmlRoot: Sandbox["getRemoteURLWithHtmlRoot"]) {
+  let fakeLink = document.createElement(fakeLinkName) as FakeLinkElement;
+  fakeLink.getRemoteURLWithHtmlRoot = getRemoteURLWithHtmlRoot;
+  return fakeLink;
 }

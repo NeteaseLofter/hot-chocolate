@@ -225,8 +225,7 @@ export class Sandbox {
   }
 
   loadRemoteCSS (cssUrl: string) {
-    cssUrl = this.getRemoteURLWithHtmlRoot(cssUrl);
-    const link = document.createElement('link');
+    const link = this.contentWindow.document.createElement('link');
     link.rel = 'stylesheet';
     link.href = cssUrl;
     this.contentWindow.document.head.appendChild(link);
