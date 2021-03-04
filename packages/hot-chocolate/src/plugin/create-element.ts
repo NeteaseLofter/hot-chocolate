@@ -161,8 +161,18 @@ class FakeLinkElement extends HTMLElement {
 
   realLink = document.createElement('link');
 
+  onload = (event: any) => {};
+
   constructor() {
     super()
+
+    this.realLink.onload = (event) => {
+      if(typeof this.onload === 'function') {
+        this.onload(event);
+        const loadEvent = new Event('load');
+        this.dispatchEvent(loadEvent);
+      }
+    }
   }
 
   // DOMString 穷举 兼容 link 节点操作
