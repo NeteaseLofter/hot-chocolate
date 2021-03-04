@@ -23,6 +23,6 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "hot-chocolate": "^0.1.5"
+    "hot-chocolate": "^0.1.6"
   }
 }
