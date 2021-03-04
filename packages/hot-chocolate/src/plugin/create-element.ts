@@ -16,7 +16,7 @@ export function createElementPlugin (hooks: SandboxHooks) {
           element = createFakeScriptElement(
             currentSandbox.loadAndRunCode.bind(currentSandbox)
           );
-        } if (type === 'link') {
+        } else if (type === 'link') {
           element = createFakeLinkElement(
             currentSandbox.getRemoteURLWithHtmlRoot.bind(currentSandbox)
           );
@@ -36,7 +36,7 @@ export function createElementPlugin (hooks: SandboxHooks) {
           element = createFakeScriptElement(
             currentSandbox.loadAndRunCode.bind(currentSandbox)
           );
-        } if (type === 'link') {
+        } else if (type === 'link') {
           element = createFakeLinkElement(
             currentSandbox.getRemoteURLWithHtmlRoot.bind(currentSandbox)
           );
