@@ -29,5 +29,6 @@ npm install
 npm start 
 ```
 ***运行结果截图***
- ![image]( https://s17.aconvert.com/convert/p3r68-cdx67/mmrf5-b4les.gif)
+ ![image]( ' https://github.com/NeteaseLofter/hot-chocolate/blob/examples/packages/examples/demo.dif')
+
 
