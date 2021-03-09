@@ -29,7 +29,7 @@ npm install
 npm start 
 ```
 ***运行结果截图***
- ![image](https://github.com/NeteaseLofter/hot-chocolate/blob/examples/packages/examples/demo.gif)
+ ![image](./demo.gif)
 
 
 
