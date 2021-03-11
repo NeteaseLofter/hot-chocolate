@@ -19,8 +19,9 @@ const manager = new Manager([
   {
     name: 'app1', // 子应用的名字，必须保证不重复
     sandboxOptions: {
-      // 子应用运行的沙箱配置
-      htmlString: `<html><body><div id="root"></div><script src="app1.js"></script></body></html>`
+      // 通过 url 配置沙箱默认html
+      // 假设http://abc.com/index.html 返回如下html: `<html><body><div id="root"></div><script src="http://abc.com/app1.js"></script></body></html>`
+      htmlRemote: 'http://abc.com/index.html'
     }
   },
   {
@@ -54,6 +55,7 @@ const sandbox = manager.activateAndMount('app2', document.body);
 
 // ready 可以保证一些异步的js已完成加载
 sandbox.ready().then(() => {
+
   // 可以通过 contentWindow 访问到里面运行的内容
   sandbox.contentWindow.custom === 'custom';
 
@@ -79,7 +81,7 @@ sandbox.ready().then(() => {
 ```
 
 ## 更多文档
-[hot-chocolate](https://github.com/NeteaseLofter/hot-chocolate/tree/master/packages/hot-chocolate)
+[hot-chocolate详细指南](https://github.com/NeteaseLofter/hot-chocolate/tree/master/packages/hot-chocolate)
 
 
 ## 更多插件

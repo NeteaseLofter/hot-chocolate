@@ -1,7 +1,8 @@
 import type { SandboxHooks, Sandbox } from '../core/sandbox';
 import type { DocumentHooks, ProxyDocument } from '../proxy/document';
+import { uniqueId } from '../utils/unique-id';
 
-type loadAndRunCode = Sandbox['loadAndRunCode'];
+type LoadAndRunCode = Sandbox['loadAndRunCode'];
 
 export function createElementPlugin (hooks: SandboxHooks) {
   let currentSandbox: Sandbox;
@@ -13,8 +14,12 @@ export function createElementPlugin (hooks: SandboxHooks) {
       return end((type: string, ...args: any) => {
         let element;
         if (type === 'script') {
-          element = createFakeScript(
+          element = createFakeScriptElement(
             currentSandbox.loadAndRunCode.bind(currentSandbox)
+          );
+        } else if (type === 'link') {
+          element = createFakeLinkElement(
+            currentSandbox.getRemoteURLWithHtmlRoot.bind(currentSandbox)
           );
         } else {
           element = document.createElement(type, ...args);
@@ -29,8 +34,12 @@ export function createElementPlugin (hooks: SandboxHooks) {
       return end((namespaceURI: string, type: string, ...args: any) => {
         let element;
         if (type === 'script') {
-          element = createFakeScript(
+          element = createFakeScriptElement(
             currentSandbox.loadAndRunCode.bind(currentSandbox)
+          );
+        } else if (type === 'link') {
+          element = createFakeLinkElement(
+            currentSandbox.getRemoteURLWithHtmlRoot.bind(currentSandbox)
           );
         } else {
           element = document.createElementNS(namespaceURI, type, ...args);
@@ -86,19 +95,20 @@ function modifyElementNode (element: Element, proxyDocument: ProxyDocument) {
   });
 }
 
-class FakeScript extends HTMLElement {
+class FakeScriptElement extends HTMLElement {
   src?: string;
   mounted: boolean = false;
-  loadAndRunCode!: loadAndRunCode;
+  loadAndRunCode!: LoadAndRunCode;
 
   constructor() {
     super()
   }
 
   private _tryLoadScript () {
-    const src = this.src;
+    const src = this.src || this.getAttribute('src');
     const _self = this;
     if (src) {
+      this.setAttribute('for-src', src);
       this.loadAndRunCode(
         {
           type: 'remote',
@@ -125,11 +135,156 @@ class FakeScript extends HTMLElement {
     this._tryLoadScript();
   }
 }
-customElements.define('sandbox-fake-script', FakeScript);
 
-function createFakeScript (loadAndRunCode: loadAndRunCode) {
-  let fakeScript = document.createElement('sandbox-fake-script') as FakeScript;
+const fakeScriptName = `sandbox-fake-script-${uniqueId}`;
+customElements.define(fakeScriptName, FakeScriptElement);
+
+function createFakeScriptElement (loadAndRunCode: LoadAndRunCode) {
+  let fakeScript = document.createElement(fakeScriptName) as FakeScriptElement;
   fakeScript.loadAndRunCode = loadAndRunCode;
 
   return fakeScript;
+}
+
+function modifyElementAttribute (element: HTMLElement, name: string, newValue: string|boolean|null) {
+  if (newValue === null) {
+    element.removeAttribute(name);
+  } else if (typeof newValue === 'boolean') {
+    element.setAttribute(name, '');
+  } else {
+    element.setAttribute(name, newValue);
+  }
+}
+
+class FakeLinkElement extends HTMLElement {
+  getRemoteURLWithHtmlRoot!: Sandbox["getRemoteURLWithHtmlRoot"];
+  mounted = false;
+
+  realLink = document.createElement('link');
+
+  onload = (event: any) => {};
+
+  constructor() {
+    super()
+
+    this.realLink.onload = (event) => {
+      if(typeof this.onload === 'function') {
+        this.onload(event);
+        const loadEvent = new Event('load');
+        this.dispatchEvent(loadEvent);
+      }
+    }
+  }
+
+  // DOMString 穷举 兼容 link 节点操作
+  // 参考于：https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLLinkElement
+  get as () {
+    return this.realLink.as;
+  }
+
+  set as (newValue) {
+    modifyElementAttribute(this, 'as', newValue);
+  }
+
+  get crossOrigin () {
+    return this.realLink.crossOrigin;
+  }
+
+  set crossOrigin (newValue) {
+    modifyElementAttribute(this, 'crossorigin', newValue);
+  }
+
+  get disabled () {
+    return this.realLink.disabled;
+  }
+
+  set disabled (newValue) {
+    modifyElementAttribute(this, 'disabled', newValue);
+  }
+
+  get href () {
+    return this.realLink.href;
+  }
+
+  set href (newValue) {
+    modifyElementAttribute(this, 'href', newValue);
+  }
+
+  get hreflang () {
+    return this.realLink.hreflang;
+  }
+
+  set hreflang (newValue) {
+    modifyElementAttribute(this, 'crossorigin', newValue);
+  }
+
+  get media () {
+    return this.realLink.media;
+  }
+
+  set media (newValue) {
+    modifyElementAttribute(this, 'media', newValue);
+  }
+
+  get rel () {
+    return this.realLink.rel;
+  }
+
+  set rel (newValue) {
+    modifyElementAttribute(this, 'rel', newValue);
+  }
+
+  get sizes () {
+    return this.realLink.sizes;
+  }
+
+  get sheet () {
+    return this.realLink.sheet;
+  }
+
+  get type () {
+    return this.realLink.type;
+  }
+
+  set type (newValue) {
+    modifyElementAttribute(this, 'type', newValue);
+  }
+
+  setAttribute (name: string, value: string) {
+    if (name === 'href') {
+      value = this.getRemoteURLWithHtmlRoot(value);
+    }
+    super.setAttribute.call(this, name, value);
+    this.realLink.setAttribute(name, value);
+  }
+
+  removeAttribute (name: string) {
+    super.removeAttribute.call(this, name);
+    this.realLink.removeAttribute(name);
+  }
+
+  __appendRealLink () {
+    this.parentNode?.insertBefore(
+      this.realLink,
+      this
+    );
+  }
+
+  disconnectedCallback () {
+    this.mounted = false;
+    this.realLink.parentNode?.removeChild(this.realLink)
+  }
+  connectedCallback () {
+    this.mounted = true;
+    this.__appendRealLink();
+  }
+}
+
+const fakeLinkName = `sandbox-fake-link-${uniqueId}`;
+customElements.define(fakeLinkName, FakeLinkElement);
+
+function createFakeLinkElement (getRemoteURLWithHtmlRoot: Sandbox["getRemoteURLWithHtmlRoot"]) {
+  let fakeLink = document.createElement(fakeLinkName) as FakeLinkElement;
+  fakeLink.getRemoteURLWithHtmlRoot = getRemoteURLWithHtmlRoot;
+  return fakeLink;
 }

@@ -1,6 +1,7 @@
 import fetchMock, { enableFetchMocks } from 'jest-fetch-mock';
 
 import { Application } from '../../src/index';
+import { uniqueId } from '../../src/utils/unique-id';
 
 enableFetchMocks();
 
@@ -117,7 +118,7 @@ test('mount & unmount', () => {
   expect(sandbox.mounted).toBe(false);
 });
 
-test('mount with html', async () => {
+test('mount with html string', async () => {
   const app = new Application({
     name: 'testApp',
     sandboxOptions: {
@@ -129,28 +130,71 @@ test('mount with html', async () => {
   sandbox.mount(document.body);
   await sandbox.ready();
   expect(sandbox.parent.shadowRoot).toBe(sandbox.shadowRoot);
+  await sandbox.ready();
   const shadowRoot = sandbox.shadowRoot;
-  expect(sandbox.shadowRoot.innerHTML).toBe(`<html><head><style>html,body {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-    }
-    table {
-      font-size: inherit;
-      white-space: inherit;
-      line-height: inherit;
-      font-weight: inherit;
-      font-size: inherit;
-      font-style: inherit;
-      text-align: inherit;
-      border-spacing: inherit;
-      font-variant: inherit;
-    }
-  </style><style>123</style><title>Hello World!</title></head><body><div>1</div></body></html>`);
+  expect(sandbox.shadowRoot.innerHTML).toBe((
+    `<html><head>${(`<style>html,body {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+      }
+      table {
+        font-size: inherit;
+        white-space: inherit;
+        line-height: inherit;
+        font-weight: inherit;
+        font-size: inherit;
+        font-style: inherit;
+        text-align: inherit;
+        border-spacing: inherit;
+        font-variant: inherit;
+      }
+    </style>`).replace(/\s/g, '')}<style>123</style><title>Hello World!</title></head><body><div>1</div></body></html>`
+  ));
   expect(shadowRoot.querySelector('title')?.innerHTML).toBe('Hello World!');
   expect(shadowRoot.querySelector('head style')).not.toBeNull();
   expect(shadowRoot.querySelector('body div')?.innerHTML).toBe('1');
   expect((sandbox.contentWindow as any).abc).toBe(1);
   expect((sandbox.contentWindow as any).eee).toBe(2);
+});
+
+test('mount with html remote', async () => {
+  const app = new Application({
+    name: 'testApp',
+    sandboxOptions: {
+      htmlRemote: '/remote',
+      htmlRoot: '/htmlRoot'
+    }
+  });
+  fetchMock.mockOnce(`<html><head><style>123</style><title>Hello World!</title><link href="/remote-link" rel="stylesheet" /></head><body><div>1</div><script>window.abc=1;</script></body></html>`);
+  const sandbox = app.activate();
+  sandbox.mount(document.body);
+  await sandbox.ready();
+  expect(sandbox.parent.shadowRoot).toBe(sandbox.shadowRoot);
+  const shadowRoot = sandbox.shadowRoot;
+  expect(sandbox.shadowRoot.innerHTML).toBe((
+    `<html><head>${(`<style>html,body {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+      }
+      table {
+        font-size: inherit;
+        white-space: inherit;
+        line-height: inherit;
+        font-weight: inherit;
+        font-size: inherit;
+        font-style: inherit;
+        text-align: inherit;
+        border-spacing: inherit;
+        font-variant: inherit;
+      }
+    </style>`).replace(/\s/g, '')}<style>123</style><title>Hello World!</title><link rel="stylesheet" href="/htmlRoot/remote-link"><sandbox-fake-link-${uniqueId} rel="stylesheet" href="/htmlRoot/remote-link"></sandbox-fake-link-${uniqueId}></head><body><div>1</div></body></html>`
+  ));
+  expect(shadowRoot.querySelector('title')?.innerHTML).toBe('Hello World!');
+  expect(shadowRoot.querySelector('head style')).not.toBeNull();
+  expect(shadowRoot.querySelector('body div')?.innerHTML).toBe('1');
+  expect((sandbox.contentWindow as any).abc).toBe(1);
 });

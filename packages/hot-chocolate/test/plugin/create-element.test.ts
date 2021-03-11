@@ -40,6 +40,7 @@ test('ownerDocument with innerHTML', async () => {
   const sandbox = app.activate();
   sandbox.mount(document.body);
   const shadowRoot = sandbox.shadowRoot;
+  await sandbox.ready();
   expect(shadowRoot.querySelector('body div')?.ownerDocument)
     .toBe(sandbox.contentWindow.document);
 });

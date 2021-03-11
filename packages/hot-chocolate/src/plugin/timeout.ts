@@ -39,7 +39,6 @@ export function timeoutPlugin (hooks: SandboxHooks) {
     }
   });
 
-  hooks.document.register('initialization', (end) => {})
   hooks.sandbox.register('destroy', (end, sandbox) => {
     setTimeoutManger.destroy();
     setIntervalManger.destroy();
