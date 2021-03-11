@@ -30,9 +30,10 @@ new Manager(
 
 ### 初始化配置
 ```js
-new Manager(
+const manager = new Manager(
   [
     {
+      // 这里就是一个 ApplicationConfig 应用配置
       name: 'app1' // 应用名字，不能重复,
       sandboxOptions: {} // 沙箱的运行配置，参考下面的说明
     },
@@ -44,7 +45,15 @@ new Manager(
 )
 ```
 
-#### sandboxOptions
+#### ApplicationConfig 应用配置
+```js
+ApplicationConfig: {
+  name: 'appName', // 应用名字，不能重复,
+  sandboxOptions: {} // 沙箱的运行配置，参考下面的说明
+}
+```
+
+#### sandboxOptions 应用启动沙箱用配置
 ```js
 SandboxOptions: {
   /**
@@ -117,6 +126,124 @@ SandboxOptions: {
 }
 ```
 
+#### Manager实例上的函数和属性
+##### manager.updateApp(appName, appConfig)
+更新/增加 一个Application到 manager 上。
+如果该应用已经有激活的沙箱，会全部销毁。
+```js
+const manager = new Manager(...);
+manager.updateApp(
+  'app1', // 应用名字
+  {} // ApplicationConfig 和初始化中的一样的格式
+)
+```
+
+##### manager.uninstallApps(appName)
+卸载已注册到manager的某个应用
+如果该应用已经有激活的沙箱，会全部销毁
+```js
+manager.uninstallApp(
+  'appName' // 需要卸载的应用名字
+)
+```
+
+##### manager.resetApps(newAppConfigs)
+重置所有配置的app
+```js
+manager.resetApps([
+  {} // ApplicationConfig 和初始化中的一样的格式
+])
+```
+
+##### manager.activate(appName)
+通过 appName 激活某一个应用的沙箱实例。
+此时 sandbox 不会自动挂载到html DOM里，可以后面通过`sandbox.mount`挂载到指定DOM节点。
+```js
+const sandbox = manager.activate(
+  'appName' // 通过 appName 激活某一个应用的沙箱实例
+)
+```
+
+##### manager.activateAndMount(appName, container)
+通过 appName 激活某一个应用的沙箱，并执行挂载到html DOM节点。
+等于 `manager.activate` + `sandbox.mount`.
+```js
+const sandbox = manager.activateAndMount(
+  'appName',
+  document.body // 一个任意的的DOM节点
+)
+```
+
+##### manager.findOrActivate(appName)
+通过 appName 查找一个已激活的沙箱实例，如果没有就激活一个新的。
+```js
+const sandbox = manager.findOrActivate(
+  'appName'
+)
+```
+
+##### manager.deactivateAll([appName])
+销毁所有已经激活的沙箱。
+- 如果传了appName: 销毁该app下的所有已经激活的沙箱；
+- 如果没传appName: 销毁所有app下的所有已经激活的沙箱；
+```js
+const sandbox = manager.deactivateAll();
+```
+
+
+#### Sandbox实例上的函数和属性
+##### sandbox.ready()
+htmlRemote, resource.js 资源全部加载完毕后执行。
+返回一个promise
+```js
+sandbox.ready().then(() => {
+  ...
+})
+```
+
+##### sandbox.loadRemoteCSS(cssUrl)
+通过url，在沙箱内加载一个css。
+```js
+sandbox.loadRemoteCSS(
+  'http://xx.com/yy.css'
+)
+```
+
+##### sandbox.runRemoteCode(remoteScriptUrl[, callback])
+通过url，在沙箱内运行一个js。
+```js
+sandbox.remoteScriptUrl(
+  'http://xx.com/yy.js',
+  () => {
+    // 此时js已运行完成
+  }
+)
+```
+
+##### sandbox.runCode(scriptString)
+在沙箱内运行一个js。
+```js
+sandbox.runCode(
+  `window.xxx = 1;`
+)
+```
+
+##### sandbox.mount(container)
+把沙箱挂载到一个DOM节点上。
+```js
+sandbox.mount(
+  document.body
+)
+```
+
+##### sandbox.unmount()
+把沙箱从挂载的DOM节点上卸载。
+
+##### sandbox.destroy()
+销毁沙箱，会同执行`sandbox.unmount`。
+
+
+
 ## 使用插件
 ```js
 import { Manager } from 'hot-chocolate';
@@ -161,7 +288,7 @@ function CustomPlugin (
   );
 }
 
-new Manager(
+const manager = new Manager(
   [ ... ],
   [
     CustomPlugin
