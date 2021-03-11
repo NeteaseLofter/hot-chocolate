@@ -1,4 +1,5 @@
 import { Hook } from '../core/hooks';
+import { getUniqueId } from '../utils/unique-id';
 
 export interface WindowHooks {
   window: Hook<{
@@ -97,7 +98,7 @@ export function createContentWindow (
     }
   });
 
-  const proxyName = `proxy${Math.floor(Math.random() * 1E9)}`;
+  const proxyName = `proxy${getUniqueId()}`;
 
   const runCode = (js: string, scriptSrc?: string) => {
     var sourceString = scriptSrc ? `//# sourceURL=${scriptSrc}` : '';

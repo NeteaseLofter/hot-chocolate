@@ -55,6 +55,7 @@ const sandbox = manager.activateAndMount('app2', document.body);
 
 // ready 可以保证一些异步的js已完成加载
 sandbox.ready().then(() => {
+
   // 可以通过 contentWindow 访问到里面运行的内容
   sandbox.contentWindow.custom === 'custom';
 

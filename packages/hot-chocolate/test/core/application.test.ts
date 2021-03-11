@@ -1,6 +1,7 @@
 import fetchMock, { enableFetchMocks } from 'jest-fetch-mock';
 
 import { Application } from '../../src/index';
+import { uniqueId } from '../../src/utils/unique-id';
 
 enableFetchMocks();
 
@@ -190,7 +191,7 @@ test('mount with html remote', async () => {
         border-spacing: inherit;
         font-variant: inherit;
       }
-    </style>`).replace(/\s/g, '')}<style>123</style><title>Hello World!</title><link rel="stylesheet" href="/htmlRoot/remote-link"></head><body><div>1</div></body></html>`
+    </style>`).replace(/\s/g, '')}<style>123</style><title>Hello World!</title><link rel="stylesheet" href="/htmlRoot/remote-link"><sandbox-fake-link-${uniqueId} rel="stylesheet" href="/htmlRoot/remote-link"></sandbox-fake-link-${uniqueId}></head><body><div>1</div></body></html>`
   ));
   expect(shadowRoot.querySelector('title')?.innerHTML).toBe('Hello World!');
   expect(shadowRoot.querySelector('head style')).not.toBeNull();

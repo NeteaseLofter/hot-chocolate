@@ -59,20 +59,24 @@ export interface SandboxHooks extends ShadowDomHooks, DocumentHooks, WindowHooks
 
 export interface SandboxOptions {
   /**
-   * html string
+   * @param htmlString
    * `
    * <html><body>xxx</body></html>
    * `
+   * 和 htmlRemote 只能选择其中一个
    */
   htmlString?: string,
 
   /**
+   * @param htmlRemote
    * 远程的 html url， 比如 http://xxx.com/index.html
    * 注意跨域问题
+   * 和 htmlString 只能选择其中一个
    */
   htmlRemote?: string,
 
   /**
+   * @param htmlRoot
    * 加载相对路径的js、css资源时的路径
    * 比如：
    * 当前 页面url为： http://abc.com/index.html
@@ -82,10 +86,15 @@ export interface SandboxOptions {
    *
    * 2. 设置 htmlRoot 为: 'http://xyz.com/static'
    * 则加载的js路径为 http://xyz.com/static/my.js
+   *
+   * 重要：该功能属于实验性功能，可能会修改
    */
   htmlRoot?: string,
 
   /**
+   * @param resource
+   * @param {string[]} resource.js - 额外的js
+   * @param {string[]} resource.css - 额外的css
    * 额外的js,css资源
    */
   resource?: {

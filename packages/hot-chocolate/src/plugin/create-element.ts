@@ -1,5 +1,6 @@
 import type { SandboxHooks, Sandbox } from '../core/sandbox';
 import type { DocumentHooks, ProxyDocument } from '../proxy/document';
+import { uniqueId } from '../utils/unique-id';
 
 type LoadAndRunCode = Sandbox['loadAndRunCode'];
 
@@ -135,7 +136,7 @@ class FakeScriptElement extends HTMLElement {
   }
 }
 
-const fakeScriptName = `sandbox-fake-script-${Math.floor(Math.random() * 1E9)}`;
+const fakeScriptName = `sandbox-fake-script-${uniqueId}`;
 customElements.define(fakeScriptName, FakeScriptElement);
 
 function createFakeScriptElement (loadAndRunCode: LoadAndRunCode) {
@@ -279,7 +280,7 @@ class FakeLinkElement extends HTMLElement {
   }
 }
 
-const fakeLinkName = `sandbox-fake-link-${Math.floor(Math.random() * 1E9)}`;
+const fakeLinkName = `sandbox-fake-link-${uniqueId}`;
 customElements.define(fakeLinkName, FakeLinkElement);
 
 function createFakeLinkElement (getRemoteURLWithHtmlRoot: Sandbox["getRemoteURLWithHtmlRoot"]) {
