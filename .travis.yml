@@ -4,3 +4,10 @@ language: node_js
 
 node_js:
   - "10"
+
+install:
+  - npm install
+  - npm run setup
+
+script:
+  - npm test
