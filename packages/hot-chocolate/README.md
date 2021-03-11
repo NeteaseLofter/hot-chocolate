@@ -126,7 +126,7 @@ SandboxOptions: {
 }
 ```
 
-#### Manager实例上的函数和属性
+## Manager实例上的函数和属性
 ##### manager.updateApp(appName, appConfig)
 更新/增加 一个Application到 manager 上。
 如果该应用已经有激活的沙箱，会全部销毁。
@@ -191,7 +191,7 @@ const sandbox = manager.deactivateAll();
 ```
 
 
-#### Sandbox实例上的函数和属性
+## Sandbox实例上的函数和属性
 ##### sandbox.ready()
 htmlRemote, resource.js 资源全部加载完毕后执行。
 返回一个promise
