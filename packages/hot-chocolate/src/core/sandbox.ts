@@ -105,6 +105,9 @@ export interface SandboxOptions {
   onDestroy?: () => void
 }
 
+/**
+ * @class
+ */
 export class Sandbox {
 
   destroyed = false;
@@ -214,7 +217,12 @@ export class Sandbox {
     });
   }
 
-  ready () {
+  /**
+   * @async
+   *
+   * htmlRemote, resource 资源全部加载完毕后执行
+   */
+   public ready () {
     return this.readyPromise;
   }
 
@@ -233,7 +241,11 @@ export class Sandbox {
     return remoteUrl;
   }
 
-  loadRemoteCSS (cssUrl: string) {
+  /**
+   * 挂载远程 css, 通过link标签
+   * @returns 创建的link节点
+   */
+  public loadRemoteCSS (cssUrl: string) {
     const link = this.contentWindow.document.createElement('link');
     link.rel = 'stylesheet';
     link.href = cssUrl;
@@ -241,7 +253,10 @@ export class Sandbox {
     return link;
   }
 
-  loadAndRunCode (script: HtmlScript, callback?: () => void) {
+  /**
+   * 运行js脚本，可以是远程或者脚本字符串
+   */
+  public loadAndRunCode (script: HtmlScript, callback?: () => void) {
     if (script.type === 'remote') {
       return this.runRemoteCode(script.url, callback);
     } else {
@@ -249,7 +264,11 @@ export class Sandbox {
     }
   }
 
-  runRemoteCode (remoteScriptUrl: string, callback?: () => void) {
+  /**
+   * 通过url运行远程js脚本
+   * 注意跨域问题
+   */
+  public runRemoteCode (remoteScriptUrl: string, callback?: () => void) {
     remoteScriptUrl = this.getRemoteURLWithHtmlRoot(remoteScriptUrl);
     return loadScriptAsText(remoteScriptUrl)
       .then((scriptString) => {
@@ -258,20 +277,20 @@ export class Sandbox {
       })
   }
 
-  mount (appContainer: Element) {
+  public mount (container: Element) {
     if (this.destroyed) {
       console.error('sandbox had destroyed, can not mount')
       return;
     }
 
-    appContainer.appendChild(
+    container.appendChild(
       this.parent
     );
     this.mounted = true;
     this.hooks.sandbox.evoke('mount', this);
   }
 
-  unmount () {
+  public unmount () {
     if (this.mounted) {
       if (this.parent.parentNode) {
         this.parent.parentNode.removeChild(this.parent);
@@ -281,7 +300,7 @@ export class Sandbox {
     }
   }
 
-  destroy () {
+  public destroy () {
     this.unmount();
 
     this.destroyed = true;
