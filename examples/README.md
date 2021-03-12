@@ -20,7 +20,7 @@ npm install
 npm start 
 ```
 ***运行结果截图***
- ![image](https://raw.githubusercontent.com/NeteaseLofter/hot-chocolate/examples/packages/examples/demo.gif)
+![image](./demo.gif)
 
 
 
