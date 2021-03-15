@@ -14,6 +14,7 @@ function VueApplication() {
           manager.deactivateAll()
           manager.activateAndMount('app1', document.body);
           manager.activateAndMount('app2', document.body);
+          manager.activateAndMount('app3', document.body);
         }
         
     },[location.pathname])

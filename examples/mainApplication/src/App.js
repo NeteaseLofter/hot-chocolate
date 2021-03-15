@@ -8,8 +8,8 @@ import { BrowserRouter as Router, Route, Link, Switch, Redirect } from 'react-ro
  
 // 引入组件
 import VueApplication from './show-vue'
-import ReactApplication1 from './show-react15'
-import ReactApplication2  from './show-react16'
+import ReactApplication from './show-react15'
+import ReactApplicationAnother  from './show-react16'
 import BothApplication from './both-show'
  
 
@@ -39,9 +39,9 @@ function App() {
             <Route exact path="/" component={ VueApplication} />
             {/* exact=false 的时候 path 等于 /login /login/me 都能匹配   但是 exact=true 的时候 只匹配 path 等于 /login */}
             <Route exact path="/vue" component={VueApplication} />
-            <Route path="/react15" component={ReactApplication1} />
-            <Route path="/react16" component={ReactApplication2} />
-            <Route path="/both" component={BothApplication} />
+            <Route  exact path="/react15" component={ReactApplication} />
+            <Route   exact path="/react16" component={ReactApplicationAnother} />
+            <Route  exact path="/both" component={BothApplication} />
           </Switch>
         </div>
       </Router>

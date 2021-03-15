@@ -9,11 +9,11 @@ import { useLocation } from 'react-router-dom'
 //  manager.activateAndMount('app2', document.body);
 // manager.findOrActivate('app1')
 // manager.deactivateAll('app2')
-function ReactApplication() {
+function ReactApplicationAnother() {
     let location = useLocation();
     console.log(location.pathname);
     useEffect(()=>{
-        if (location.pathname === '/react')
+        if (location.pathname === '/react16')
         {
             manager.deactivateAll()
             manager.activateAndMount('app3', document.body);
@@ -26,4 +26,4 @@ function ReactApplication() {
     );
 }
 
-export default ReactApplication
+export default ReactApplicationAnother

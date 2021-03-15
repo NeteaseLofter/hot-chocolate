@@ -13,7 +13,7 @@ function ReactApplication() {
     let location = useLocation();
     console.log(location.pathname);
     useEffect(()=>{
-        if (location.pathname === '/react')
+        if (location.pathname === '/react15')
         {
             manager.deactivateAll()
             manager.activateAndMount('app1', document.body);

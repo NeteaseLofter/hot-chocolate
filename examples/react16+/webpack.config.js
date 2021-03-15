@@ -9,7 +9,8 @@ module.exports = {
     contentBase: './dist',
     hot: true,
     port: 9527,
-    open: false
+    open: false,
+    headers:{"Access-Control-Allow-Origin":'*'}
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -21,7 +22,8 @@ module.exports = {
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
-    clean: true
+    clean: true,
+    publicPath: '/'
   },
   module: {
     rules: [

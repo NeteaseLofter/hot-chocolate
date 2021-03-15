@@ -23,7 +23,7 @@
     "load-sub-react15":"cd react15 && npm start",
     "load-sub-react16":"cd react16+ && npm start",
     "install": "concurrently \"npm run install-main\" \"npm run install-sub-vue\" \"npm run install-sub-react15\"\"npm run install-sub-react16\" ",
-    "start":"concurrently \"npm run load-main\" \"npm run load-sub-vue\" \"npm run load-sub-react15\"\"npm run load-sub-react16\" " 
+    "start":"concurrently \"npm run load-main\" \"npm run load-sub-vue\" \"npm run load-sub-react15\"" 
   },
   "license": "MIT",
   "devDependencies": {
