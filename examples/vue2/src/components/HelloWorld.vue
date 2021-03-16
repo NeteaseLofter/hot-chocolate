@@ -1,7 +1,7 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <button  v-on:click=" isShow=!isShow" >点击我出现小惊喜</button>
+    <button  v-on:click=" isShow=!isShow" >点击我出现小惊喜卡卡</button>
     <p  v-if="isShow">congratulation </p>
   </div>
 </template>

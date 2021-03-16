@@ -1,16 +1,18 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
-  // mode: 'production',
+  mode: 'development',
   entry: {
     index: './src/index.js',
   },
   devServer: {
     contentBase: './dist',
-    hot: true,
+    hot: false,
     port: 9528,
-    headers:{"Access-Control-Allow-Origin":'*'}
+    headers:{"Access-Control-Allow-Origin":'*'},
+    host: 'localhost'
   },
+  devtool: "eval-source-map",
   plugins: [
     new HtmlWebpackPlugin({
       title: 'Development',

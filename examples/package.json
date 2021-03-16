@@ -18,12 +18,12 @@
     "install-sub-vue": "cd vue2 && npm install",
     "install-sub-react15": "cd react15 && npm install",
     "install-sub-react16": "cd react16+ && npm install",
-    "load-main":"cd mainApplication && npm start",
-    "load-sub-vue":"cd vue2 && npm start",
-    "load-sub-react15":"cd react15 && npm start",
-    "load-sub-react16":"cd react16+ && npm start",
+    "load-main": "cd mainApplication && npm start",
+    "load-sub-vue": "cd vue2 && npm start",
+    "load-sub-react15": "cd react15 && npm start",
+    "load-sub-react16": "cd react16+ && npm start",
     "install": "concurrently \"npm run install-main\" \"npm run install-sub-vue\" \"npm run install-sub-react15\"\"npm run install-sub-react16\" ",
-    "start":"concurrently \"npm run load-main\" \"npm run load-sub-vue\" \"npm run load-sub-react15\"" 
+    "start": "concurrently \"npm run load-main\" \"npm run load-sub-vue\" \"npm run load-sub-react15\""
   },
   "license": "MIT",
   "devDependencies": {
@@ -35,7 +35,11 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
+    "@koa/cors": "^3.1.0",
+    "@koa/router": "^10.0.0",
+    "axios": "^0.21.1",
     "hot-chocolate": "^0.1.8-alpha.0",
+    "koa": "^2.13.1",
     "react": "^15.6.0",
     "react-dom": "^15.6.0"
   }

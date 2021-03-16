@@ -11,8 +11,6 @@ import VueApplication from './show-vue'
 import ReactApplication from './show-react15'
 import ReactApplicationAnother  from './show-react16'
 import BothApplication from './both-show'
- 
-
 function App() {
   return (
     <div className="App">

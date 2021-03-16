@@ -20,7 +20,7 @@ class LikeButton extends React.Component {
     return element(
       'button',
       { onClick: () => {this.setState({ liked: true });} },
-      '点我一下',
+      '点我一下下',
     );
   }
 }
