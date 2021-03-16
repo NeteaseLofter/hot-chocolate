@@ -146,7 +146,7 @@ function CustomPlugin (
         return end({
           getItem: () => {},
           removeItem: () => {},
-          setItemItem: () => {},
+          setItem: () => {},
           // ... 其他补充
         })
       }
