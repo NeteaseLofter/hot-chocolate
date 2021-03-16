@@ -19,7 +19,7 @@ function Example() {
   return (
     <div>
       <p>You clicked {count} times</p>
-      {/* 验证插件CustomPlugin作用 */}
+      {/* 验证插件CustomPlugin作用,拦截setItem,因此输出undefined */}
       <button onClick={() =>{ setCount(count + 1);
         localStorage.setItem('myCat', 'Tom');
         console.log( localStorage.getItem('myCat'))}}>
