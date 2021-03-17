@@ -1,5 +1,5 @@
 {
-  "name": "crepe-dev-server",
+  "name": "mille-crepe-cli",
   "version": "0.1.0",
   "description": "js sandbox on browser",
   "keywords": [
@@ -7,11 +7,13 @@
     "micro-frontend",
     "microfrontend"
   ],
+  "bin": {
+    "mille-crepe": "./bin/cli.js"
+  },
   "main": "lib/index.js",
   "files": [
     "lib"
   ],
-
   "private": true,
   "scripts": {
     "test": "jest --collect-coverage",

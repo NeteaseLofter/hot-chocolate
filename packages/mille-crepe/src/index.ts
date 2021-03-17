@@ -1,5 +1,3 @@
-import { MainApp } from "./core/main-app";
-
 export {
   MainApp,
   createMainAppAsync

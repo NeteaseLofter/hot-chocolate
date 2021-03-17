@@ -5,33 +5,33 @@ import type {
   Plugin
 } from 'hot-chocolate';
 
+import {
+  presetPlugins
+} from './preset'
 
-
-// script milk-tea-dev-server --config xxx.js
-/**
- module.exports = {
-
-}
- */
 
 interface MainAppOptions {
   remote: string,
-  plugins: Plugin[]
+  plugins?: Plugin[]
 }
 
 export class MainApp {
   remote: string;
+
   manager: Manager;
 
   fetching: null|Promise<any> = null;
 
   constructor ({
     remote,
-    plugins
+    plugins = []
   }: MainAppOptions) {
     this.remote = remote;
 
-    this.manager = new Manager([], plugins);
+    this.manager = new Manager([], [
+      ...presetPlugins,
+      ...plugins
+    ]);
     this.syncApps();
   }
 
@@ -46,26 +46,34 @@ export class MainApp {
       this.fetching = this.fetchApps()
         .then(({ apps }) => {
           return apps.map((app: any) => {
+            let resource = {} as any;
             try {
-              var resource = JSON.parse(app.resource);
-            } catch (err) {
-              resource = {}
+              resource = JSON.parse(app.resource);
+            } catch (err) {}
+            const entry = resource.entry || [];
+            const htmlRemote = resource.htmlRemote || '';
+
+            const sandboxOptions: any = {
+              htmlString: resource.htmlString || '<html><body><div id="root"></div></body></html>',
+            };
+            if (htmlRemote) {
+              sandboxOptions.htmlRemote = htmlRemote;
+              sandboxOptions.htmlRoot = resource.htmlRoot || '';
+            } else {
+              const js = entry.filter((url: string) => /\.js$/.test(url));
+              const css = entry.filter((url: string) => /\.css$/.test(url));
+              sandboxOptions.resource = {
+                js,
+                css
+              }
             }
-            const entry = resource && resource.entry || [];
-            const requestRewrite = resource && resource.requestRewrite || {};
-            const js = entry.filter((url: string) => /\.js$/.test(url));
-            const css = entry.filter((url: string) => /\.css$/.test(url));
             return {
-              name: app.name,
-              sandboxOptions: {
-                htmlString: resource.htmlString || `<html><body><div id="root"></div></body></html>`,
-                resource: {
-                  js: js,
-                  css: css
-                }
-              },
-              tag: app.tag,
+              name: app.appName,
+              sandboxOptions,
+              description: app.remark,
+              activeRule: app.activeRule,
               id: app.id,
+              originText: app.resource,
               origin: resource
             };
           });
