@@ -3,14 +3,11 @@
   "version": "0.1.4",
   "description": "",
   "scripts": {
-    "setup": "lerna bootstrap",
-    "test": "lerna run test",
-    "build": "lerna run build --include-dependencies"
+    "setup": "pnpm install",
+    "test": "pnpm test -r"
   },
   "license": "MIT",
   "private": true,
-  "devDependencies": {
-    "lerna": "^3.22.1"
-  },
+  "devDependencies": {},
   "dependencies": {}
 }

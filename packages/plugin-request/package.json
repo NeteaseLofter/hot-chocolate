@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "clean": "rimraf lib",
+    "test": "npm run build",
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build"
   },
