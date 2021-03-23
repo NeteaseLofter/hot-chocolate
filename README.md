@@ -53,6 +53,9 @@ const sandbox = manager.activate('app1');
 // 适合同时会提供界面的内容
 const sandbox = manager.activateAndMount('app2', document.body);
 
+// 销毁挂载的子应用,如果不写参数默认销毁所有子应用
+manager.deactivateAll('app2')
+
 // ready 可以保证一些异步的js已完成加载
 sandbox.ready().then(() => {
 
