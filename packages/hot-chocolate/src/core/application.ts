@@ -1,5 +1,6 @@
 import { Hook } from './hooks';
 
+import type { Manager } from './manager';
 import { Sandbox } from './sandbox';
 import type { SandboxHooks, SandboxOptions } from './sandbox';
 
@@ -17,16 +18,19 @@ export interface ApplicationConfig {
 export class Application {
   _plugins: Plugin[];
   config: ApplicationConfig;
+  manager?: Manager;
 
   activatedSandbox: Sandbox[];
 
   constructor (
     config: ApplicationConfig,
-    plugins: Plugin[] = []
+    plugins: Plugin[] = [],
+    manager?: Manager
   ) {
     this._plugins = plugins;
     this.config = config;
     this.activatedSandbox = [];
+    this.manager = manager;
   }
 
   activate () {
@@ -111,6 +115,7 @@ export interface Plugin {
   (
     hooks: SandboxHooks,
     application: Application,
+    manager?: Manager
   ): void;
 }
 
@@ -122,7 +127,8 @@ export function activatePlugins (
   plugins.forEach((plugin) => {
     plugin(
       hooks,
-      application
+      application,
+      application.manager
     )
   });
 }

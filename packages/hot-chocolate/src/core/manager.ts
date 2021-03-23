@@ -42,7 +42,11 @@ export class Manager {
       this.apps[appName].deactivateAll();
     }
 
-    this.apps[appName] = new Application(appConfig, this.plugins);
+    this.apps[appName] = new Application(
+      appConfig,
+      this.plugins,
+      this
+    );
   }
 
   /**
@@ -80,7 +84,7 @@ export class Manager {
     });
 
     newAppConfigs.forEach((appConfig) => {
-      this.apps[appConfig.name] = new Application(appConfig, plugins);
+      this.apps[appConfig.name] = new Application(appConfig, plugins, this);
     })
   }
 

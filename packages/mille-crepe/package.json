@@ -13,7 +13,6 @@
   ],
   "private": true,
   "scripts": {
-    "test": "jest --collect-coverage",
     "clean": "rimraf lib",
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build"
