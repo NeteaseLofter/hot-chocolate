@@ -84,6 +84,7 @@ sandbox.ready().then(() => {
 ```
 
 ## 更多文档
+[更多使用例子](./examples/README.md)
 [hot-chocolate详细指南](https://github.com/NeteaseLofter/hot-chocolate/tree/master/packages/hot-chocolate)
 
 

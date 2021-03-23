@@ -4,7 +4,6 @@ import printMe from './print.js';
 import './style.css'
 
 const element = React.createElement;
-const e = React.createElement;
 console.log(printMe)
 printMe();
 class LikeButton extends React.Component {
@@ -15,7 +14,7 @@ class LikeButton extends React.Component {
 
   render() {
     if (this.state.liked) {
-      return e('div', {className: "hello"}, 'Hello React15');
+      return element('div', {className: 'hello'}, 'Hello React15');
     }
     return element(
       'button',

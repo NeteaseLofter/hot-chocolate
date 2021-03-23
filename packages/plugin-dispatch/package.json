@@ -1,6 +1,6 @@
 {
   "name": "@hot-chocolate/plugin-dispatch",
-  "version": "0.1.4",
+  "version": "0.1.0",
   "description": "dispatch other app in hot-chocolate",
   "keywords": [
     "sandbox",
