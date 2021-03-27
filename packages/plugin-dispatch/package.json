@@ -8,6 +8,9 @@
     "micro-frontend",
     "microfrontend"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "lib/index.js",
   "files": [
     "lib",

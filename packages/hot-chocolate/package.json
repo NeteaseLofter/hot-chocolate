@@ -8,6 +8,9 @@
     "micro-frontend",
     "microfrontend"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "lib/index.js",
   "files": [
     "lib"
@@ -27,6 +30,5 @@
     "jest-fetch-mock": "^3.0.3",
     "rimraf": "^3.0.2",
     "typescript": "^4.1.3"
-  },
-  "gitHead": "e49c7c185b3784b968b0054b2d72c76f7252ac54"
+  }
 }

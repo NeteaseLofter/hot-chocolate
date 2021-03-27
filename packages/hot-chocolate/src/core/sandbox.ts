@@ -6,7 +6,7 @@ import { createDocument } from '../proxy/document';
 import type { DocumentHooks } from '../proxy/document';
 import { createContentWindow } from '../proxy/window';
 import type { WindowHooks, ProxyWindow } from '../proxy/window';
-import { loadScriptAsText, loadRemoteAsText } from '../utils/loader';
+import { loadRemoteAsText } from '../utils/loader';
 
 export interface SandboxHooks extends ShadowDomHooks, DocumentHooks, WindowHooks {
   sandbox: Hook<{
@@ -52,6 +52,14 @@ export interface SandboxHooks extends ShadowDomHooks, DocumentHooks, WindowHooks
     unmount: {
       args: [Sandbox],
       result: void
+    },
+    /**
+     * 在sandbox 加载资源时被唤起
+     * 返回一个回调函数，在回调函数中自定义加载方式
+     */
+    loadResource: {
+      args: [Sandbox],
+      result: (url: string) => Promise<string>
     }
   }>,
   [other: string]: undefined|Hook<any>
@@ -165,6 +173,7 @@ export class Sandbox {
       head,
       readyPromise
     } = createShadowDom(
+      this,
       hooks,
       proxyWindow,
       proxyDocument,
@@ -226,6 +235,19 @@ export class Sandbox {
     return this.readyPromise;
   }
 
+  async loadResource (url: string) {
+    const {
+      isEnd,
+      result
+    } = this.hooks.sandbox.evoke('fetchResource', this, url);
+
+    if (isEnd) {
+      return result(url)
+    }
+
+    return loadRemoteAsText(url)
+  }
+
   getRemoteURLWithHtmlRoot (remoteUrl: string) {
     if (
       this.htmlRoot
@@ -270,10 +292,12 @@ export class Sandbox {
    */
   public runRemoteCode (remoteScriptUrl: string, callback?: () => void) {
     remoteScriptUrl = this.getRemoteURLWithHtmlRoot(remoteScriptUrl);
-    return loadScriptAsText(remoteScriptUrl)
+    return this.loadResource(remoteScriptUrl)
       .then((scriptString) => {
         this.runCode(scriptString, remoteScriptUrl);
         callback && callback();
+      }, () => {
+        // fetch error：比如跨域失败
       })
   }
 

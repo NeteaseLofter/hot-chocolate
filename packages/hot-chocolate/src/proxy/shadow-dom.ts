@@ -3,7 +3,7 @@ import { Hook } from '../core/hooks';
 import type { ProxyWindow } from './window';
 import type { ProxyDocument } from './document';
 
-import { loadRemoteAsText } from '../utils/loader';
+import type { Sandbox } from '../core/sandbox';
 
 export interface ShadowDomHooks {
   shadowDom: Hook<{
@@ -106,6 +106,7 @@ export function parserHTMLString (htmlString: string) {
 }
 
 export function createShadowDom (
+  sandbox: Sandbox,
   hooks: ShadowDomHooks,
   proxyWindow: ProxyWindow,
   proxyDocument: ProxyDocument,
@@ -120,7 +121,6 @@ export function createShadowDom (
   parent.style.height = '100%';
 
 
-
   const fakeHTML = proxyDocument.createElement('html');
   const fakeHead = proxyDocument.createElement('head');
   const fakeBody = proxyDocument.createElement('body');
@@ -132,7 +132,7 @@ export function createShadowDom (
 
   const parserHTML = async () => {
     if (htmlRemote) {
-      const remoteHtmlText = await loadRemoteAsText(htmlRemote);
+      const remoteHtmlText = await sandbox.loadResource(htmlRemote);
       return parserHTMLString(remoteHtmlText);
     } else if (htmlString) {
       return parserHTMLString(htmlString);
@@ -158,11 +158,16 @@ export function createShadowDom (
       Reflect.set(Object.getPrototypeOf(fakeHead), 'innerHTML', defaultDom.head.innerHTML, fakeHead);
     }
 
+    // 重置 shadow 里的样式
     const initStyle = proxyDocument.createElement('style');
-    initStyle.innerHTML = (`html,body {
+    initStyle.innerHTML = (`
+      html,
+      body {
         position: relative;
         width: 100%;
         height: 100%;
+      }
+      html {
         overflow: auto;
       }
       table {
