@@ -239,9 +239,9 @@ export class Sandbox {
     const {
       isEnd,
       result
-    } = this.hooks.sandbox.evoke('fetchResource', this, url);
+    } = this.hooks.sandbox.evoke('loadResource', this);
 
-    if (isEnd) {
+    if (isEnd && result) {
       return result(url)
     }
 
