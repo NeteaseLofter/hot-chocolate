@@ -8,6 +8,8 @@
   },
   "license": "MIT",
   "private": true,
-  "devDependencies": {},
+  "devDependencies": {
+    "@changesets/cli": "^2.14.1"
+  },
   "dependencies": {}
 }
