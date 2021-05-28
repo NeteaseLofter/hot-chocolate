@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "setup": "pnpm install",
+    "version": "changeset",
     "test": "pnpm test -r"
   },
   "license": "MIT",

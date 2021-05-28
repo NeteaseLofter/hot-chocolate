@@ -73,20 +73,25 @@ export function parserHTMLString (htmlString: string) {
     const scriptNodes = defaultDom.getElementsByTagName('script');
     (Array.prototype.slice.call(scriptNodes, 0) as HTMLScriptElement[])
       .forEach((scriptElement) => {
-        if(scriptElement.src) {
-          htmlScripts.push({
-            type: 'remote',
-            url: scriptElement.src
-          })
-        } else if (scriptElement.innerHTML) {
-          htmlScripts.push({
-            type: 'local',
-            content: scriptElement.innerHTML
-          })
-        }
+        if (
+          !scriptElement.type
+          || scriptElement.type === 'application/javascript'
+        ) {
+          if(scriptElement.src) {
+            htmlScripts.push({
+              type: 'remote',
+              url: scriptElement.src
+            })
+          } else if (scriptElement.innerHTML) {
+            htmlScripts.push({
+              type: 'local',
+              content: scriptElement.innerHTML
+            })
+          }
 
-        if (scriptElement.parentNode) {
-          scriptElement.parentNode.removeChild(scriptElement);
+          if (scriptElement.parentNode) {
+            scriptElement.parentNode.removeChild(scriptElement);
+          }
         }
       })
 

@@ -97,6 +97,7 @@ function modifyElementNode (element: Element, proxyDocument: ProxyDocument) {
 
 class FakeScriptElement extends HTMLElement {
   src?: string;
+  type?: string;
   mounted: boolean = false;
   loadAndRunCode!: LoadAndRunCode;
 
@@ -106,24 +107,32 @@ class FakeScriptElement extends HTMLElement {
 
   private _tryLoadScript () {
     const src = this.src || this.getAttribute('src');
+    const type = this.type || this.getAttribute('type')
     const _self = this;
-    if (src) {
-      this.setAttribute('for-src', src);
-      this.loadAndRunCode(
-        {
-          type: 'remote',
-          url: src
-        },
-        () => {
-          if (!this.mounted) return;
-          if (src !== _self.src) return;
-          if (_self.onload) {
-            const loadEvent = new Event('load');
-            _self.onload(loadEvent);
-            _self.dispatchEvent(loadEvent);
+    if (
+      (
+        !type
+        || type === 'application/javascript'
+      )
+    ) {
+      if (src) {
+        this.setAttribute('for-src', src);
+        this.loadAndRunCode(
+          {
+            type: 'remote',
+            url: src
+          },
+          () => {
+            if (!this.mounted) return;
+            if (src !== _self.src) return;
+            if (_self.onload) {
+              const loadEvent = new Event('load');
+              _self.onload(loadEvent);
+              _self.dispatchEvent(loadEvent);
+            }
           }
-        }
-      );
+        );
+      }
     }
   }
 
