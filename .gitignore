@@ -8,7 +8,6 @@ pnpm-lock.yaml
 yarn.lock
 .vscode
 
-.changeset
 .nyc_output
 coverage.lcov
 coverage
