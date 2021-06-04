@@ -1,2 +1,4 @@
 packages:
   - 'packages/**'
+  - '!packages/mille-crepe'
+  - '!packages/mille-crepe-cli'

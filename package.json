@@ -5,6 +5,7 @@
   "scripts": {
     "setup": "pnpm install",
     "version": "changeset",
+    "build": "pnpm run build -r",
     "test": "pnpm test -r"
   },
   "license": "MIT",
