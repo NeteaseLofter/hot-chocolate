@@ -53,7 +53,7 @@ export function createContentWindow (
       }
       const { isEnd, result } = hooks.window.evoke('has', target, property, rawWindow);
       if (isEnd) return result;
-      return Reflect.has(target, property) || Reflect.has(rawWindow, property)
+      return true;
     },
     get (target, property, receiver) {
       const { isEnd, result } = hooks.window.evoke('get', target, property, receiver, rawWindow);
