@@ -53,6 +53,11 @@ export function createContentWindow (
       }
       const { isEnd, result } = hooks.window.evoke('has', target, property, rawWindow);
       if (isEnd) return result;
+      /**
+       * 这里需要默认返回true
+       * 否则一些变量赋值操作，未添加 var的情况下，如： abc = 1;
+       * 由于第一次 target.abc必定返回 false，到是会作用域向上查找，最后作用到原始的window上，会污染全局
+       */
       return true;
     },
     get (target, property, receiver) {
