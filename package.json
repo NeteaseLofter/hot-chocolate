@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "setup": "pnpm install",
-    "version": "changeset",
+    "changeset": "changeset",
+    "version": "changeset version",
     "build": "pnpm run build -r",
     "test": "pnpm test -r"
   },
