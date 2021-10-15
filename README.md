@@ -92,3 +92,4 @@ sandbox.ready().then(() => {
 | 名字 | 功能 |
 |----|----|
 |[@hot-chocolate/plugin-request](https://github.com/NeteaseLofter/hot-chocolate/tree/master/packages/plugin-request)| 拦截子应用中发出的AJAX请求 |
+|[@hot-chocolate/plugin-dispatch](https://github.com/NeteaseLofter/hot-chocolate/tree/master/packages/plugin-dispatch)| 应用间相互调用 |

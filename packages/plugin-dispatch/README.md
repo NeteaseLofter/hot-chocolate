@@ -1,4 +1,4 @@
-# @hot-chocolate/plugin-request
+# @hot-chocolate/plugin-dispatch
 
 
 ## 安装
