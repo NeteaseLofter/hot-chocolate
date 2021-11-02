@@ -69,6 +69,7 @@ export function parserHTMLString (htmlString: string) {
   let htmlCSSLinks: HtmlLink[] = [];
   let defaultDom: Document;
 
+  htmlString = htmlString.replace(/<noscript>.*?<\/noscript>/, '');
   defaultDom = domParser.parseFromString(htmlString, 'text/html');
     const scriptNodes = defaultDom.getElementsByTagName('script');
     (Array.prototype.slice.call(scriptNodes, 0) as HTMLScriptElement[])
@@ -185,6 +186,9 @@ export function createShadowDom (
         text-align: inherit;
         border-spacing: inherit;
         font-variant: inherit;
+      }
+      noscript {
+        display: none;
       }
     `).replace(/\s/g, '');
     if (fakeHead.firstChild) {
