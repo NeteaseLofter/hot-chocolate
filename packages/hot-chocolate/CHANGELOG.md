@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.2.5
+
+### Patch Changes
+
+- 0b4c249: 自动移除 noscript 标签
+
 ## 0.2.4
 
 ### Patch Changes
