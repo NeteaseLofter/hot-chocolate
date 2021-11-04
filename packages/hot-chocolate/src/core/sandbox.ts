@@ -63,7 +63,7 @@ export interface SandboxHooks extends ShadowDomHooks, DocumentHooks, WindowHooks
     },
 
     replaceCSSString: {
-      args: [Sandbox, string],
+      args: [Sandbox, string, string | undefined],
       result: string
     }
   }>,
@@ -272,11 +272,11 @@ export class Sandbox {
     return remoteUrl;
   }
 
-  public replaceCSSString (cssString: string) {
+  public replaceCSSString (cssString: string, cssUrl?: string) {
     const {
       isEnd,
       result
-    } = this.hooks.sandbox.evoke('replaceCSSString', this, cssString);
+    } = this.hooks.sandbox.evoke('replaceCSSString', this, cssString, cssUrl);
 
     if (isEnd) {
       return result as string;
@@ -291,7 +291,10 @@ export class Sandbox {
     cssUrl = this.getRemoteURLWithHtmlRoot(cssUrl);
     return this.loadResource(cssUrl)
       .then((cssString) => {
-        return this.replaceCSSString(cssString)
+        return this.replaceCSSString(
+          cssString,
+          cssUrl
+        )
       })
   }
 

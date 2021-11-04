@@ -193,7 +193,7 @@ describe('sandbox mount', () => {
     expect(sandbox.parent.shadowRoot).toBe(sandbox.shadowRoot);
     const shadowRoot = sandbox.shadowRoot;
     expect(sandbox.shadowRoot.innerHTML).toBe((
-      `<html><head>${sandboxInitStyle}<style>123</style><title>Hello World!</title><style></style><sandbox-fake-link-${uniqueId} href="/htmlRoot/remote-link" rel="stylesheet"></sandbox-fake-link-${uniqueId}></head><body><div>1</div></body></html>`
+      `<html><head>${sandboxInitStyle}<style>123</style><title>Hello World!</title><style></style><sandbox-fake-link-${uniqueId} href="/remote-link" rel="stylesheet"></sandbox-fake-link-${uniqueId}></head><body><div>1</div></body></html>`
     ));
     expect(shadowRoot.querySelector('title')?.innerHTML).toBe('Hello World!');
     expect(shadowRoot.querySelector('head style')).not.toBeNull();

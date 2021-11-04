@@ -269,6 +269,15 @@ class FakeLinkElement extends HTMLElement {
     super()
 
     this.realElement = this.realLinkElement;
+    this.realLinkElement.onload = this.__callOnLoad;
+  }
+
+  __callOnLoad = () => {
+    if (typeof this.onload === 'function') {
+      const loadEvent = new Event('load');
+      this.onload(loadEvent);
+      this.dispatchEvent(loadEvent);
+    }
   }
 
   // DOMString 穷举 兼容 link 节点操作
@@ -298,7 +307,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   get href () {
-    return this.realLinkElement.href;
+    return this.getAttribute('href');
   }
 
   set href (newValue) {
@@ -346,10 +355,10 @@ class FakeLinkElement extends HTMLElement {
   }
 
   setAttribute (name: string, value: string) {
+    super.setAttribute.call(this, name, value);
     if (name === 'href') {
       value = this.getRemoteURLWithHtmlRoot(value);
     }
-    super.setAttribute.call(this, name, value);
     this.realLinkElement.setAttribute(name, value);
     this.__switchRealElement();
     this.__loadStyle();
@@ -376,6 +385,7 @@ class FakeLinkElement extends HTMLElement {
         this.href
       ).then((cssString) => {
         this.realStyleElement.innerHTML = cssString;
+        this.__callOnLoad();
       })
     }
   }

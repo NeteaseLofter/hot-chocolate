@@ -11,6 +11,23 @@ import type { SandboxHooks, Sandbox } from '../core/sandbox';
 
 const sandboxFontStylesMap = new Map<Sandbox, HTMLStyleElement>();
 
+const pathResolve = (
+  path: string,
+  relative: string
+) => {
+  const pathArray = path.split('/')
+  const relativeArray = relative.split('/');
+
+  relativeArray.forEach((pathname) => {
+    if (pathname === '..') {
+      pathArray.splice(-1);
+    } else if (pathname !== '.') {
+      pathArray.push(pathname);
+    }
+  })
+  return pathArray.join('/')
+}
+
 export function replaceCSSStringPlugin (hooks: SandboxHooks) {
   hooks.sandbox.register('mount', (end, sandbox) => {
     const fontFaceStyleElement = document.createElement('style');
@@ -18,7 +35,12 @@ export function replaceCSSStringPlugin (hooks: SandboxHooks) {
     document.head.appendChild(fontFaceStyleElement);
     sandboxFontStylesMap.set(sandbox, fontFaceStyleElement);
   })
-  hooks.sandbox.register('replaceCSSString', (end, sandbox, cssString) => {
+  hooks.sandbox.register('replaceCSSString', (
+    end,
+    sandbox,
+    cssString,
+    cssUrl
+  ) => {
     // console.log('replaceCSSString', cssString);
     cssString = cssString.replace(/:root/g, ':host');
     const fontFaceStyleElement = sandboxFontStylesMap.get(sandbox);
@@ -30,6 +52,17 @@ export function replaceCSSStringPlugin (hooks: SandboxHooks) {
       return '';
     })
     if (fontFaceStyleElement) {
+      const getCurrentUrl = (relativeUrl: string) => {
+        if (
+          cssUrl
+          && relativeUrl[0] === '.'
+        ) {
+          console.log(cssUrl, relativeUrl);
+          return pathResolve(cssUrl, relativeUrl);
+        }
+        return sandbox.getRemoteURLWithHtmlRoot(relativeUrl);
+      }
+
       fontFaceStyleElement.innerHTML = fontFaceStyleElement.innerHTML + fontFaceCSSString.replace(urlReg, (
         all,
         s1,
@@ -38,13 +71,13 @@ export function replaceCSSStringPlugin (hooks: SandboxHooks) {
         s4
       ) => {
         if (s2) {
-          return `url("${sandbox.getRemoteURLWithHtmlRoot(s2)}")`;
+          return `url("${getCurrentUrl(s2)}")`;
         }
         if (s3) {
-          return `url('${sandbox.getRemoteURLWithHtmlRoot(s3)}')`;
+          return `url('${getCurrentUrl(s3)}')`;
         }
         if (s4) {
-          return `url(${sandbox.getRemoteURLWithHtmlRoot(s4)})`;
+          return `url(${getCurrentUrl(s4)})`;
         }
         return all;
       })

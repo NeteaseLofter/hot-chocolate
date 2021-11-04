@@ -81,11 +81,11 @@ test('font-face from link tag is replace', async () => {
   const app = new Application({
     name: 'testApp',
     sandboxOptions: {
-      htmlString: '<html><head><link rel="stylesheet" href="/remote/css"></head><body></body></html>',
+      htmlString: '<html><head><link rel="stylesheet" href="/css"></head><body></body></html>',
       htmlRoot: '/remote'
     }
   });
-  fetchMock.mockOnce(`@font-face{font-family: "Open Sans";src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2");}body{color:#fff;}`);
+  fetchMock.mockOnce(`@font-face{font-family: "Open Sans";src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),url("../fonts/OpenSans-Regular-webfont.woff") format("woff");}body{color:#fff;}`);
 
   const sandbox = app.activate();
   sandbox.mount(document.body);
@@ -103,5 +103,5 @@ test('font-face from link tag is replace', async () => {
 
   const outStyleElement = (document.querySelector(`style[sandbox-id="${sandbox.id}"]`) as HTMLStyleElement);
   expect(outStyleElement.innerHTML)
-    .toBe('@font-face{font-family: "Open Sans";src: url("/remote/fonts/OpenSans-Regular-webfont.woff2") format("woff2");}');
+    .toBe('@font-face{font-family: "Open Sans";src: url("/remote/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),url("/remote/fonts/OpenSans-Regular-webfont.woff") format("woff");}');
 });
