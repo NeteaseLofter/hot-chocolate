@@ -3,6 +3,7 @@ import type { DocumentHooks, ProxyDocument } from '../proxy/document';
 import { uniqueId } from '../utils/unique-id';
 
 type LoadAndRunCode = Sandbox['loadAndRunCode'];
+type LoadRemoteCSS = Sandbox['loadRemoteCSS'];
 
 export function createElementPlugin (hooks: SandboxHooks) {
   let currentSandbox: Sandbox;
@@ -28,13 +29,14 @@ export function createElementPlugin (hooks: SandboxHooks) {
           );
         } else if (type === 'link') {
           element = createFakeLinkElement(
-            currentSandbox.getRemoteURLWithHtmlRoot.bind(currentSandbox)
+            currentSandbox.loadRemoteCSS.bind(currentSandbox),
+            currentSandbox.getRemoteURLWithHtmlRoot.bind(currentSandbox),
           );
         } else {
           element = document.createElement(type, ...args);
+          modifyElementNode(element, receiver, currentSandbox);
         }
 
-        modifyElementNode(element, receiver);
         return element;
       });
     }
@@ -48,13 +50,15 @@ export function createElementPlugin (hooks: SandboxHooks) {
           );
         } else if (type === 'link') {
           element = createFakeLinkElement(
-            currentSandbox.getRemoteURLWithHtmlRoot.bind(currentSandbox)
+            currentSandbox.loadRemoteCSS.bind(currentSandbox),
+            currentSandbox.getRemoteURLWithHtmlRoot.bind(currentSandbox),
           );
+          return element;
         } else {
           element = document.createElementNS(namespaceURI, type, ...args);
+          modifyElementNode(element, receiver, currentSandbox);
         }
 
-        modifyElementNode(element, receiver);
         return element;
       });
     }
@@ -70,7 +74,37 @@ export function createElementPlugin (hooks: SandboxHooks) {
   })
 }
 
-function modifyElementNode (element: Element, proxyDocument: ProxyDocument) {
+function replaceElementNode (
+  element: HTMLElement,
+  sandbox: Sandbox
+) {
+  let newElement;
+  let type = element.nodeName.toLowerCase();
+  if (type === 'script') {
+    newElement = createFakeScriptElement(
+      sandbox.loadAndRunCode.bind(sandbox)
+    );
+  } else if (type === 'link') {
+    newElement = createFakeLinkElement(
+      sandbox.loadRemoteCSS.bind(sandbox),
+      sandbox.getRemoteURLWithHtmlRoot.bind(sandbox)
+    );
+  }
+  if (newElement) {
+    for (let name of element.getAttributeNames()) {
+      let value = element.getAttribute(name);
+      newElement.setAttribute(name, value as string);
+    }
+
+  }
+  return newElement;
+}
+
+function modifyElementNode (
+  element: Element,
+  proxyDocument: ProxyDocument,
+  sandbox: Sandbox
+) {
   // // 兼容 ownerDocument 获取绑定节点，期待更好办法
   Object.defineProperty(element, 'ownerDocument', {
     value: proxyDocument
@@ -87,21 +121,62 @@ function modifyElementNode (element: Element, proxyDocument: ProxyDocument) {
       return Reflect.get(prototype, 'innerHTML', element);
     },
     set: (value: string) => {
+      if (element.tagName.toUpperCase() === 'STYLE') {
+        Reflect.set(
+          prototype,
+          'innerHTML',
+          sandbox.replaceCSSString(value),
+          element
+        );
+        return;
+      }
       const domParser = new DOMParser();
-      const doc = domParser.parseFromString(value, 'text/html');
-      const allElements = doc.querySelectorAll('body *');
+      let allElements: NodeListOf<Element>;
+      let childContainer: HTMLElement;
+      if (element.tagName.toUpperCase() === 'HEAD') {
+        const doc = domParser.parseFromString('', 'text/html');
+        doc.head.innerHTML = value;
+        allElements = doc.querySelectorAll('head *');
+        childContainer = doc.head;
+      } else {
+        const doc = domParser.parseFromString(value, 'text/html');
+        allElements = doc.querySelectorAll('body *');
+        childContainer = doc.body;
+      }
+
       for(let i = 0; i < allElements.length; i++) {
-        modifyElementNode(allElements[i], proxyDocument)
+        let element = allElements[i];
+        let currentElement;
+        if (element.nodeType === 1) {
+          currentElement = replaceElementNode(
+            element as HTMLElement,
+            sandbox
+          )
+        }
+        if (currentElement) {
+          element.parentNode?.replaceChild(
+            currentElement,
+            element
+          );
+        } else {
+          modifyElementNode(allElements[i], proxyDocument, sandbox)
+        }
       }
 
       // element..innerHTML = '';
       Reflect.set(prototype, 'innerHTML', '', element);
-      const childrenNodes = Array.prototype.slice.call(doc.body.childNodes, 0);
+      const childrenNodes = Array.prototype.slice.call(childContainer.childNodes, 0);
       for(let i = 0; i < childrenNodes.length; i++) {
         element.appendChild(childrenNodes[i]);
       }
     }
   });
+
+  if (element.tagName.toUpperCase() === 'STYLE') {
+    element.innerHTML = element.innerHTML;
+  }
+
+  return element;
 }
 
 class FakeScriptElement extends HTMLElement {
@@ -164,6 +239,7 @@ function createFakeScriptElement (loadAndRunCode: LoadAndRunCode) {
   return fakeScript;
 }
 
+
 function modifyElementAttribute (element: HTMLElement, name: string, newValue: string|boolean|null) {
   if (newValue === null) {
     element.removeAttribute(name);
@@ -174,30 +250,31 @@ function modifyElementAttribute (element: HTMLElement, name: string, newValue: s
   }
 }
 
+
 class FakeLinkElement extends HTMLElement {
-  getRemoteURLWithHtmlRoot!: Sandbox["getRemoteURLWithHtmlRoot"];
+  loadRemoteCSS!: LoadRemoteCSS;
+  getRemoteURLWithHtmlRoot!: Sandbox['getRemoteURLWithHtmlRoot'];
+
   mounted = false;
 
-  realLink = document.createElement('link');
+  realLinkElement = document.createElement('link');
+
+  realStyleElement = document.createElement('style');
+
+  realElement: HTMLLIElement | HTMLStyleElement;
 
   onload = (event: any) => {};
 
   constructor() {
     super()
 
-    this.realLink.onload = (event) => {
-      if(typeof this.onload === 'function') {
-        this.onload(event);
-        const loadEvent = new Event('load');
-        this.dispatchEvent(loadEvent);
-      }
-    }
+    this.realElement = this.realLinkElement;
   }
 
   // DOMString 穷举 兼容 link 节点操作
   // 参考于：https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLLinkElement
   get as () {
-    return this.realLink.as;
+    return this.realLinkElement.as;
   }
 
   set as (newValue) {
@@ -205,7 +282,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   get crossOrigin () {
-    return this.realLink.crossOrigin;
+    return this.realLinkElement.crossOrigin;
   }
 
   set crossOrigin (newValue) {
@@ -213,7 +290,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   get disabled () {
-    return this.realLink.disabled;
+    return this.realLinkElement.disabled;
   }
 
   set disabled (newValue) {
@@ -221,7 +298,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   get href () {
-    return this.realLink.href;
+    return this.realLinkElement.href;
   }
 
   set href (newValue) {
@@ -229,7 +306,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   get hreflang () {
-    return this.realLink.hreflang;
+    return this.realLinkElement.hreflang;
   }
 
   set hreflang (newValue) {
@@ -237,7 +314,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   get media () {
-    return this.realLink.media;
+    return this.realLinkElement.media;
   }
 
   set media (newValue) {
@@ -245,7 +322,7 @@ class FakeLinkElement extends HTMLElement {
   }
 
   get rel () {
-    return this.realLink.rel;
+    return this.realLinkElement.rel;
   }
 
   set rel (newValue) {
@@ -253,15 +330,15 @@ class FakeLinkElement extends HTMLElement {
   }
 
   get sizes () {
-    return this.realLink.sizes;
+    return this.realLinkElement.sizes;
   }
 
   get sheet () {
-    return this.realLink.sheet;
+    return this.realLinkElement.sheet;
   }
 
   get type () {
-    return this.realLink.type;
+    return this.realLinkElement.type;
   }
 
   set type (newValue) {
@@ -273,36 +350,84 @@ class FakeLinkElement extends HTMLElement {
       value = this.getRemoteURLWithHtmlRoot(value);
     }
     super.setAttribute.call(this, name, value);
-    this.realLink.setAttribute(name, value);
+    this.realLinkElement.setAttribute(name, value);
+    this.__switchRealElement();
+    this.__loadStyle();
   }
 
   removeAttribute (name: string) {
     super.removeAttribute.call(this, name);
-    this.realLink.removeAttribute(name);
+    this.realLinkElement.removeAttribute(name);
+    if (name === 'rel') {
+      this.__switchRealElement();
+    }
   }
 
-  __appendRealLink () {
+  __nowLoadedHref?: string;
+  __loadStyle () {
+    if (
+      this.__isCSSLink()
+      && this.href
+      && this.mounted
+      && this.__nowLoadedHref !== this.href
+    ) {
+      this.__nowLoadedHref = this.href;
+      this.loadRemoteCSS(
+        this.href
+      ).then((cssString) => {
+        this.realStyleElement.innerHTML = cssString;
+      })
+    }
+  }
+
+  __isCSSLink () {
+    return this.rel === 'stylesheet';
+  }
+
+  __switchRealElement () {
+    const prevRealElement = this.realElement;
+    if (this.__isCSSLink()) {
+      this.realElement = this.realStyleElement;
+    } else {
+      this.realElement = this.realLinkElement;
+    }
+
+    if (
+      this.mounted
+      && prevRealElement !== this.realElement
+    ) {
+      prevRealElement.parentNode?.removeChild(prevRealElement);
+      this.__appendRealElement();
+    }
+  }
+
+  __appendRealElement () {
     this.parentNode?.insertBefore(
-      this.realLink,
+      this.realElement,
       this
     );
   }
 
   disconnectedCallback () {
     this.mounted = false;
-    this.realLink.parentNode?.removeChild(this.realLink)
+    this.realElement.parentNode?.removeChild(this.realElement)
   }
   connectedCallback () {
     this.mounted = true;
-    this.__appendRealLink();
+    this.__appendRealElement();
+    this.__loadStyle();
   }
 }
 
 const fakeLinkName = `sandbox-fake-link-${uniqueId}`;
 customElements.define(fakeLinkName, FakeLinkElement);
 
-function createFakeLinkElement (getRemoteURLWithHtmlRoot: Sandbox["getRemoteURLWithHtmlRoot"]) {
+function createFakeLinkElement (
+  loadRemoteCSS: LoadRemoteCSS,
+  getRemoteURLWithHtmlRoot: Sandbox['getRemoteURLWithHtmlRoot']
+) {
   let fakeLink = document.createElement(fakeLinkName) as FakeLinkElement;
+  fakeLink.loadRemoteCSS = loadRemoteCSS;
   fakeLink.getRemoteURLWithHtmlRoot = getRemoteURLWithHtmlRoot;
   return fakeLink;
 }

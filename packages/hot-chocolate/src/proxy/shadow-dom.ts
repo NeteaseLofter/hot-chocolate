@@ -66,7 +66,7 @@ export type HtmlLink = {
 export function parserHTMLString (htmlString: string) {
   const domParser = new DOMParser();
   let htmlScripts: HtmlScript[] = [];
-  let htmlCSSLinks: HtmlLink[] = [];
+  // let htmlCSSLinks: HtmlLink[] = [];
   let defaultDom: Document;
 
   htmlString = htmlString.replace(/<noscript>.*?<\/noscript>/, '');
@@ -96,18 +96,17 @@ export function parserHTMLString (htmlString: string) {
         }
       })
 
-    const cssLinkNodes = defaultDom.querySelectorAll('link[rel=stylesheet]');
-    (Array.prototype.slice.call(cssLinkNodes, 0) as HTMLLinkElement[])
-      .forEach((linkElement) => {
-        htmlCSSLinks.push({ url: linkElement.href });
-        if (linkElement.parentNode) {
-          linkElement.parentNode.removeChild(linkElement);
-        }
-      })
+    // const cssLinkNodes = defaultDom.querySelectorAll('link[rel=stylesheet]');
+    // (Array.prototype.slice.call(cssLinkNodes, 0) as HTMLLinkElement[])
+    //   .forEach((linkElement) => {
+    //     htmlCSSLinks.push({ url: linkElement.href });
+    //     if (linkElement.parentNode) {
+    //       linkElement.parentNode.removeChild(linkElement);
+    //     }
+    //   })
   return {
     defaultDom,
-    htmlScripts,
-    htmlCSSLinks
+    htmlScripts
   }
 }
 
@@ -146,8 +145,7 @@ export function createShadowDom (
 
     return {
       defaultDom: null,
-      htmlScripts: [],
-      htmlCSSLinks: []
+      htmlScripts: []
     }
   }
 
@@ -160,8 +158,7 @@ export function createShadowDom (
 
     if (defaultDom) {
       fakeBody.innerHTML = defaultDom.body.innerHTML;
-      // fakeHead.innerHTML = defaultDom.head.innerHTML;
-      Reflect.set(Object.getPrototypeOf(fakeHead), 'innerHTML', defaultDom.head.innerHTML, fakeHead);
+      fakeHead.innerHTML = defaultDom.head.innerHTML;
     }
 
     // 重置 shadow 里的样式

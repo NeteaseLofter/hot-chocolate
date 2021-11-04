@@ -60,6 +60,11 @@ export interface SandboxHooks extends ShadowDomHooks, DocumentHooks, WindowHooks
     loadResource: {
       args: [Sandbox],
       result: (url: string) => Promise<string>
+    },
+
+    replaceCSSString: {
+      args: [Sandbox, string],
+      result: string
     }
   }>,
   [other: string]: undefined|Hook<any>
@@ -117,6 +122,7 @@ export interface SandboxOptions {
  * @class
  */
 export class Sandbox {
+  id = `${new Date().getTime()}-${Math.round(1000 * Math.random())}`;
 
   destroyed = false;
   mounted = false;
@@ -189,9 +195,9 @@ export class Sandbox {
     this.hooks.sandbox.evoke('initialization', this);
 
     this.readyPromise = new Promise(async (resolve) => {
-      const { htmlScripts, htmlCSSLinks } = await readyPromise;
+      const { htmlScripts } = await readyPromise;
       const exCSSResources = [
-        ...htmlCSSLinks,
+        // ...htmlCSSLinks,
         ...(
           resource && resource.css
             ? resource.css.map((css) => ({
@@ -202,7 +208,7 @@ export class Sandbox {
       ];
 
       for (let i = 0; i < exCSSResources.length; i++) {
-        await this.loadRemoteCSS(exCSSResources[i].url);
+        await this.appendRemoteCSS(exCSSResources[i].url);
       }
 
       const exJSResources = [
@@ -263,16 +269,35 @@ export class Sandbox {
     return remoteUrl;
   }
 
+  public replaceCSSString (cssString: string) {
+    const {
+      isEnd,
+      result
+    } = this.hooks.sandbox.evoke('replaceCSSString', this, cssString);
+
+    if (isEnd) {
+      return result as string;
+    }
+    return cssString;
+  }
+
   /**
-   * 挂载远程 css, 通过link标签
-   * @returns 创建的link节点
+   * 挂载远程 css
    */
   public loadRemoteCSS (cssUrl: string) {
-    const link = this.contentWindow.document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = cssUrl;
-    this.contentWindow.document.head.appendChild(link);
-    return link;
+    cssUrl = this.getRemoteURLWithHtmlRoot(cssUrl);
+    return this.loadResource(cssUrl)
+      .then((cssString) => {
+        return this.replaceCSSString(cssString)
+      })
+  }
+
+  public async appendRemoteCSS (cssUrl: string) {
+    const styleElement = this.contentWindow.document.createElement('style');
+    this.contentWindow.document.head.appendChild(styleElement);
+
+    const cssString = await this.loadRemoteCSS(cssUrl);
+    styleElement.innerHTML = cssString;
   }
 
   /**
