@@ -81,7 +81,7 @@ test('font-face from link tag is replace', async () => {
   const app = new Application({
     name: 'testApp',
     sandboxOptions: {
-      htmlString: '<html><head><link rel="stylesheet" href="/css"></head><body></body></html>',
+      htmlString: '<html><head><link rel="stylesheet" href="/test/abc.css"></head><body></body></html>',
       htmlRoot: '/remote'
     }
   });

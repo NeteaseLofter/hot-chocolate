@@ -18,6 +18,7 @@ const pathResolve = (
   const pathArray = path.split('/')
   const relativeArray = relative.split('/');
 
+  pathArray.splice(-1);
   relativeArray.forEach((pathname) => {
     if (pathname === '..') {
       pathArray.splice(-1);
@@ -57,7 +58,6 @@ export function replaceCSSStringPlugin (hooks: SandboxHooks) {
           cssUrl
           && relativeUrl[0] === '.'
         ) {
-          console.log(cssUrl, relativeUrl);
           return pathResolve(cssUrl, relativeUrl);
         }
         return sandbox.getRemoteURLWithHtmlRoot(relativeUrl);
