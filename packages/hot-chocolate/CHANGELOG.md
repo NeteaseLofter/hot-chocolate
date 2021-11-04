@@ -1,5 +1,13 @@
 # hot-chocolate
 
+## 0.2.7
+
+### Patch Changes
+
+- 95155d7: 1. css font-face 相对路径支持
+  2. link onload 支持
+- 95155d7: link href 重复设置导致前缀丢失
+
 ## 0.2.6
 
 ### Patch Changes
