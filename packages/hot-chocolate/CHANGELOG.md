@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.2.8
+
+### Patch Changes
+
+- d03c097: css 加载资源时相对路径错误
+
 ## 0.2.7
 
 ### Patch Changes
