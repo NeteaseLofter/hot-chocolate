@@ -248,6 +248,9 @@ export class Sandbox {
     } = this.hooks.sandbox.evoke('loadResource', this);
 
     if (isEnd && result) {
+      if (typeof result === 'string') {
+        return result;
+      }
       return result(url)
     }
 
