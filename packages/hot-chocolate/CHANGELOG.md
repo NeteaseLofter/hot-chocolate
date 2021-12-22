@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.2.10
+
+### Patch Changes
+
+- f9425ee: 修复字体图标的相对路径错误
+
 ## 0.2.9
 
 ### Patch Changes
