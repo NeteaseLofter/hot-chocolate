@@ -278,14 +278,10 @@ export class Sandbox {
 
     if (this.htmlRemote) {
       // 适配相对目录
-      if (
-        !/^((\w:\/\/)|(\/))/.test(remoteUrl)
-      ) {
-        return urlResolve(
-          this.htmlRemote,
-          remoteUrl
-        );
-      }
+      return urlResolve(
+        this.htmlRemote,
+        remoteUrl
+      );
     }
     return remoteUrl;
   }
@@ -306,7 +302,7 @@ export class Sandbox {
    * 挂载远程 css
    */
   public loadRemoteCSS (cssUrl: string) {
-    cssUrl = this.getRemoteURLWithHtmlRoot(cssUrl);
+    // cssUrl = this.getRemoteURLWithHtmlRoot(cssUrl);
     return this.loadResource(cssUrl)
       .then((cssString) => {
         return this.replaceCSSString(

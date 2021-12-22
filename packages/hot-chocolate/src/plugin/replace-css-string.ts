@@ -1,4 +1,7 @@
 import type { SandboxHooks, Sandbox } from '../core/sandbox';
+import {
+  resolve as urlResolve
+} from '../utils/url';
 
 /**
  * font-face 示例
@@ -10,24 +13,6 @@ import type { SandboxHooks, Sandbox } from '../core/sandbox';
  */
 
 const sandboxFontStylesMap = new Map<Sandbox, HTMLStyleElement>();
-
-const pathResolve = (
-  path: string,
-  relative: string
-) => {
-  const pathArray = path.split('/')
-  const relativeArray = relative.split('/');
-
-  pathArray.splice(-1);
-  relativeArray.forEach((pathname) => {
-    if (pathname === '..') {
-      pathArray.splice(-1);
-    } else if (pathname !== '.') {
-      pathArray.push(pathname);
-    }
-  })
-  return pathArray.join('/')
-}
 
 export function replaceCSSStringPlugin (hooks: SandboxHooks) {
   hooks.sandbox.register('mount', (end, sandbox) => {
@@ -56,9 +41,8 @@ export function replaceCSSStringPlugin (hooks: SandboxHooks) {
       const getCurrentUrl = (relativeUrl: string) => {
         if (
           cssUrl
-          && relativeUrl[0] === '.'
         ) {
-          return pathResolve(cssUrl, relativeUrl);
+          relativeUrl = urlResolve(cssUrl, relativeUrl);
         }
         return sandbox.getRemoteURLWithHtmlRoot(relativeUrl);
       }

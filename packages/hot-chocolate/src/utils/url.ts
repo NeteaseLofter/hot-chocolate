@@ -2,6 +2,9 @@ export const resolve = (
   origin: string,
   target: string
 ) => {
+  if (/^((\w:\/\/)|(\/))/.test(target)) {
+    return target;
+  }
   let originArr = origin.split('/').slice(0, -1);
   let targetArr = target.split('/');
 
