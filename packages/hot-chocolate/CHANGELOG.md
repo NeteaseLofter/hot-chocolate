@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.2.11
+
+### Patch Changes
+
+- 4828a6d: fix: 上一版本中 css 加载问题
+
 ## 0.2.10
 
 ### Patch Changes
