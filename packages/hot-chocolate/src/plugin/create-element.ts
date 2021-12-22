@@ -374,15 +374,17 @@ class FakeLinkElement extends HTMLElement {
 
   __nowLoadedHref?: string;
   __loadStyle () {
+    const href = this.getAttribute('href') || this.href;
+
     if (
       this.__isCSSLink()
-      && this.href
+      && href
       && this.mounted
-      && this.__nowLoadedHref !== this.href
+      && this.__nowLoadedHref !== href
     ) {
-      this.__nowLoadedHref = this.href;
+      this.__nowLoadedHref = href;
       this.loadRemoteCSS(
-        this.href
+        href
       ).then((cssString) => {
         this.realStyleElement.innerHTML = cssString;
         this.__callOnLoad();

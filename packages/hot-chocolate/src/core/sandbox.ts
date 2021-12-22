@@ -7,6 +7,9 @@ import type { DocumentHooks } from '../proxy/document';
 import { createContentWindow } from '../proxy/window';
 import type { WindowHooks, ProxyWindow } from '../proxy/window';
 import { loadRemoteAsText } from '../utils/loader';
+import {
+  resolve as urlResolve
+} from '../utils/url';
 
 export interface SandboxHooks extends ShadowDomHooks, DocumentHooks, WindowHooks {
   sandbox: Hook<{
@@ -132,6 +135,7 @@ export class Sandbox {
   contentWindow: ProxyWindow;
   readyPromise: Promise<void>;
   htmlRoot?: string;
+  htmlRemote?: string;
   onDestroy?: () => void;
 
   runCode: (js: string, scriptSrc?: string | undefined) => any;
@@ -149,6 +153,7 @@ export class Sandbox {
     this.hooks = hooks;
     this.onDestroy = onDestroy;
     this.htmlRoot = htmlRoot;
+    this.htmlRemote = htmlRemote;
 
     this.hooks.sandbox.evoke('beforeInitialization', this);
 
@@ -261,12 +266,25 @@ export class Sandbox {
     if (
       this.htmlRoot
     ) {
+      // 适配根目录
       if (remoteUrl.indexOf('/') === 0) {
         return this.htmlRoot + remoteUrl;
       }
 
       if (remoteUrl.indexOf(window.location.origin) === 0) {
         return this.htmlRoot + remoteUrl.slice(window.location.origin.length);
+      }
+    }
+
+    if (this.htmlRemote) {
+      // 适配相对目录
+      if (
+        !/^((\w:\/\/)|(\/))/.test(remoteUrl)
+      ) {
+        return urlResolve(
+          this.htmlRemote,
+          remoteUrl
+        );
       }
     }
     return remoteUrl;

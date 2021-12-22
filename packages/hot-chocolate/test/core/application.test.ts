@@ -182,7 +182,7 @@ describe('sandbox mount', () => {
     const app = new Application({
       name: 'testApp',
       sandboxOptions: {
-        htmlRemote: '/remote',
+        htmlRemote: '/htmlRoot/remote',
         htmlRoot: '/htmlRoot'
       }
     });
@@ -199,5 +199,15 @@ describe('sandbox mount', () => {
     expect(shadowRoot.querySelector('head style')).not.toBeNull();
     expect(shadowRoot.querySelector('body div')?.innerHTML).toBe('1');
     expect((sandbox.contentWindow as any).abc).toBe(1);
+
+    fetchMock.mockOnceIf('/htmlRoot/relative', async () => {
+      return `window.relative=1;`
+    })
+
+    await sandbox.loadAndRunCode({
+      type: 'remote',
+      url: 'relative'
+    })
+    expect((sandbox.contentWindow as any).relative).toBe(1);
   });
 })

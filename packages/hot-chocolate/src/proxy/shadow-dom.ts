@@ -78,10 +78,11 @@ export function parserHTMLString (htmlString: string) {
           !scriptElement.type
           || scriptElement.type === 'application/javascript'
         ) {
-          if(scriptElement.src) {
+          const src = scriptElement.getAttribute('src');
+          if(src) {
             htmlScripts.push({
               type: 'remote',
-              url: scriptElement.src
+              url: src
             })
           } else if (scriptElement.innerHTML) {
             htmlScripts.push({
