@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.2.9
+
+### Patch Changes
+
+- 支持解析沙箱中的相对路径资源
+
 ## 0.2.8
 
 ### Patch Changes
