@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.2.13
+
+### Patch Changes
+
+- e45182e: fix: document readyState 错误
+
 ## 0.2.12
 
 ### Patch Changes
