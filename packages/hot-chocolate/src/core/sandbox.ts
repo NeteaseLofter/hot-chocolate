@@ -215,6 +215,7 @@ export class Sandbox {
       for (let i = 0; i < exCSSResources.length; i++) {
         await this.appendRemoteCSS(exCSSResources[i].url);
       }
+ 
 
       const exJSResources = [
         ...htmlScripts,
@@ -231,6 +232,21 @@ export class Sandbox {
       for (let i = 0; i < exJSResources.length; i++) {
         await this.loadAndRunCode(exJSResources[i]);
       }
+
+
+      try {
+        (this.contentWindow.document as any).readyState = 'complete';
+      } catch (e) {}
+      this.contentWindow.document.dispatchEvent(
+        new Event('DOMContentLoaded')
+      )
+
+      try {
+        (this.contentWindow.document as any).readyState = 'loaded';
+      } catch (e) {}
+      this.contentWindow.dispatchEvent(
+        new Event('load')
+      )
 
       this.hooks.sandbox.evoke('ready', this);
       resolve();

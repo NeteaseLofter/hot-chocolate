@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.2.12
+
+### Patch Changes
+
+- 兼容触发 document DOMContentLoaded 和 window load 事件
+
 ## 0.2.11
 
 ### Patch Changes
