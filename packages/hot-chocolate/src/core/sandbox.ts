@@ -199,6 +199,13 @@ export class Sandbox {
 
     this.hooks.sandbox.evoke('initialization', this);
 
+    try {
+      (this.contentWindow.document as any).readyState = 'loading';
+    } catch (e) {}
+    this.contentWindow.document.dispatchEvent(
+      new Event('readystatechange')
+    )
+
     this.readyPromise = new Promise(async (resolve) => {
       const { htmlScripts } = await readyPromise;
       const exCSSResources = [
@@ -235,15 +242,21 @@ export class Sandbox {
 
 
       try {
-        (this.contentWindow.document as any).readyState = 'complete';
+        (this.contentWindow.document as any).readyState = 'interactive';
       } catch (e) {}
+      this.contentWindow.document.dispatchEvent(
+        new Event('readystatechange')
+      )
       this.contentWindow.document.dispatchEvent(
         new Event('DOMContentLoaded')
       )
 
       try {
-        (this.contentWindow.document as any).readyState = 'loaded';
+        (this.contentWindow.document as any).readyState = 'complete';
       } catch (e) {}
+      this.contentWindow.document.dispatchEvent(
+        new Event('readystatechange')
+      )
       this.contentWindow.dispatchEvent(
         new Event('load')
       )
