@@ -302,9 +302,9 @@ export class Sandbox {
    * 挂载远程 css
    */
   public loadRemoteCSS (cssUrl: string) {
-    // cssUrl = this.getRemoteURLWithHtmlRoot(cssUrl);
-    return this.loadResource(cssUrl)
-      .then((cssString) => {
+    return this.loadResource(
+      this.getRemoteURLWithHtmlRoot(cssUrl)
+    ).then((cssString) => {
         return this.replaceCSSString(
           cssString,
           cssUrl
