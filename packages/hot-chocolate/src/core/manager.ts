@@ -18,7 +18,7 @@ export class Manager {
   ) {
     this.apps = {};
     this.plugins = plugins;
-
+    console.log('构造的时候测试一下看看连上了没'),
     this.resetApps(appsConfig);
   }
 

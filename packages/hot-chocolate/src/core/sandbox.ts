@@ -307,6 +307,7 @@ export class Sandbox {
 
     if (this.htmlRemote) {
       // 适配相对目录
+      console.log('hhah',remoteUrl)
       return urlResolve(
         this.htmlRemote,
         remoteUrl
