@@ -2,7 +2,7 @@
   "name": "react15",
   "version": "1.0.0",
   "description": "",
-  "private": "true",
+  "private": true,
   "dependencies": {
     "@babel/runtime": "^7.18.3",
     "react": "^15.6.0",
