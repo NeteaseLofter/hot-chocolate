@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.2.14
+
+### Patch Changes
+
+- 6c6f9cb: 更新 hot-chocolate proxy window 的 has 逻辑；更新 dispatch 会抛出\_\_sandbox
+
 ## 0.2.13
 
 ### Patch Changes
