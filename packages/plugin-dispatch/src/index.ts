@@ -26,9 +26,14 @@ export function createSandboxDispatchPlugin (): Plugin {
           app.mount(mountAt);
         }
         await app?.ready();
-        return (app.contentWindow as any)[DISPATCH_MODULE_KEY][DISPATCH_MODULE_EXPORTS_KEY];
+        return {
+          ...(app.contentWindow as any)[DISPATCH_MODULE_KEY][DISPATCH_MODULE_EXPORTS_KEY],
+          __sandbox: app
+        };
       }
-      return {};
+      return {
+        __sandbox: app
+      };
     }
     hooks.window.register('has', (end, target, property) => {
       // 避免通过 for in 等操作被查询到

@@ -111,10 +111,6 @@ function modifyElementNode (
   });
 
   const prototype = Object.getPrototypeOf(element);
-  // console.log(
-  //   Reflect.get(element, 'innerHTML', element),
-  //   Object.getOwnPropertyDescriptor(prototype, 'innerHTML')
-  // )
 
   Object.defineProperty(element, 'innerHTML', {
     get: () => {
@@ -197,6 +193,7 @@ class FakeScriptElement extends HTMLElement {
       (
         !type
         || type === 'application/javascript'
+        || type === 'text/javascript'
       )
     ) {
       if (src) {
@@ -215,6 +212,14 @@ class FakeScriptElement extends HTMLElement {
               _self.dispatchEvent(loadEvent);
             }
           }
+        );
+      } else {
+        this.loadAndRunCode(
+          {
+            type: 'local',
+            content: _self.innerHTML
+          },
+          () => {}
         );
       }
     }

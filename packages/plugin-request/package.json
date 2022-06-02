@@ -1,6 +1,6 @@
 {
-  "name": "@hot-chocolate/plugin-dispatch",
-  "version": "0.1.0",
+  "name": "@hot-chocolate/plugin-request",
+  "version": "0.1.4",
   "description": "js sandbox on browser",
   "keywords": [
     "sandbox",
@@ -9,7 +9,8 @@
     "microfrontend"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "main": "lib/index.js"
   },
   "main": "lib/index.js",
   "files": [
@@ -22,6 +23,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.18.2",
     "@babel/preset-env": "^7.13.12",
     "@babel/preset-typescript": "^7.13.0",
     "@types/jest": "^26.0.22",

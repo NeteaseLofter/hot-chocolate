@@ -7,7 +7,8 @@
     "changeset": "changeset",
     "version": "changeset version",
     "build": "pnpm run build -r",
-    "test": "pnpm test -r"
+    "test": "pnpm test -r",
+    "examples": "pnpm run build --filter ./packages && pnpm run start --filter ./examples"
   },
   "license": "MIT",
   "private": true,
