@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   mode: 'development',
   entry: {
-    index: './src/index.js',
+    index: './src/index.jsx',
   },
   devServer: {
     contentBase: './dist',
@@ -37,8 +37,9 @@ module.exports = {
           options: {
             presets: ['@babel/preset-env']
           }
-        }, exclude: /node_modules/
-      }    // 添加排除项
+        },
+        exclude: /node_modules/
+      }
     ],
   },
 };

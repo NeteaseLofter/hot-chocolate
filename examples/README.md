@@ -13,11 +13,7 @@
 
 ***在主应用中使用 hot-chocolate***
 ```shell
-# 进入主应用
-cd examples
-# 对于每一个应用，开一个node进程
-npm install
-npm start
+pnpm run start --filter ./examples
 # 如果需要一些接口请求验证
 cd provideApi
 node app.js

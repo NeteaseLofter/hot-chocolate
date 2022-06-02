@@ -3,11 +3,12 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   mode: 'development',
   entry: {
-    index: './src/index.js',
+    index: './src/index.jsx',
   },
   devServer: {
     contentBase: './dist',
     hot: false,
+    open: false,
     port: 9528,
     headers:{"Access-Control-Allow-Origin":'*'},
     host: 'localhost'
@@ -32,6 +33,15 @@ module.exports = {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
       },
+      {
+        test: /\.js|jsx$/, use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        },
+        exclude: /node_modules/
+      }
     ],
   },
 };

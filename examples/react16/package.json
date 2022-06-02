@@ -1,9 +1,10 @@
 {
-  "name": "react15",
+  "name": "react16",
   "version": "1.0.0",
   "description": "",
   "private": "true",
   "dependencies": {
+    "@babel/runtime": "^7.18.3",
     "react": "^16.9.0",
     "react-dom": "^16.9.0"
   },
@@ -12,6 +13,7 @@
     "@babel/plugin-transform-runtime": "^7.13.10",
     "@babel/preset-env": "^7.13.10",
     "@babel/preset-react": "^7.12.13",
+    "@hot-chocolate/plugin-dispatch": "^0.1.0",
     "babel-loader": "^8.2.2",
     "css-loader": "^5.1.2",
     "html-webpack-plugin": "^5.3.1",
@@ -23,7 +25,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "start": "webpack serve --open"
+    "start": "webpack serve"
   },
   "keywords": [],
   "author": "",

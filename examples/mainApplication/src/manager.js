@@ -3,8 +3,8 @@ import {
 } from 'hot-chocolate';
 // import { Hook, Application } from 'hot-chocolate';
 import {
-  createSandboxRequestPlugin
-} from '@hot-chocolate/plugin-request';
+  createSandboxDispatchPlugin
+} from '@hot-chocolate/plugin-dispatch';
 function CustomPlugin(
   hooks,
   application // 启动插件的application
@@ -20,7 +20,9 @@ function CustomPlugin(
         return end({
           getItem: () => { },
           removeItem: () => { },
-          setItem: () => { },
+          setItem: (key, newValue) => {
+            alert(`要设置${key}: ${newValue}，但是不会生效`);
+          },
           // ... 其他补充
         })
       }
@@ -29,20 +31,21 @@ function CustomPlugin(
 }
 export const manager = new Manager(
   [
+
     {
-      name: 'app1', // 子应用的名字，必须保证不重复,react15
+      name: 'app1', // 子应用的名字，必须保证不重复,vue
+      sandboxOptions: {
+        htmlRemote: 'http://localhost:9529',
+        htmlRoot: 'http://localhost:9529'
+      }
+    },
+    {
+      name: 'app2', // 子应用的名字，必须保证不重复,react15
       sandboxOptions: {
         // 通过 url 配置沙箱默认html
         // 假设http://abc.com/index.html 返回如下html: `<html><body><div id="root"></div><script src="http://abc.com/app1.js"></script></body></html>`
         htmlRemote: 'http://localhost:9528',
         htmlRoot: 'http://localhost:9528'
-      }
-    },
-    {
-      name: 'app2', // 子应用的名字，必须保证不重复,vue
-      sandboxOptions: {
-        htmlRemote: 'http://localhost:9529',
-        htmlRoot: 'http://localhost:9529'
       }
     },
     {
@@ -55,24 +58,7 @@ export const manager = new Manager(
   ],
   [
     CustomPlugin, //自己写了一个插件，插件示例，禁止localstorage使用
-    createSandboxRequestPlugin({
-      // 请求发送前的勾子
-      beforeRequest: ({
-        url,
-        method
-      }, app1) => {
-        //    返回新的请求url及method
-        //   return {
-        //     url: 'xxxx',
-        //     method: 'POST'
-        //   }
-        console.log(url, method)
-        return {
-          url,
-          method
-        }
-      },
-    }) // 使用拦截用例里的插件
+    createSandboxDispatchPlugin() // 使用调用插件
   ],
 );
 
