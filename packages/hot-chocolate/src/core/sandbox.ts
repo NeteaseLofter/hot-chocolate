@@ -258,7 +258,7 @@ export class Sandbox {
         new Event('readystatechange')
       )
       this.contentWindow.dispatchEvent(
-        new Event('load')
+        new Event('sandbox-load')
       )
 
       this.hooks.sandbox.evoke('ready', this);

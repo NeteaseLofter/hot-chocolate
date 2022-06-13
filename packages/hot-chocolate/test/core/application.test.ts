@@ -35,16 +35,13 @@ describe('sandbox window isolation', () => {
 
   test('set attr on window is isolation', () => {
     (sandbox1.contentWindow as any).test = 'test';
-    sandbox1.runCode('window.runCodeTest="test";promotionTest="promotion"');
+    sandbox1.runCode('window.runCodeTest="test";');
     expect((sandbox1.contentWindow as any).test).toBe('test');
     expect((sandbox1.contentWindow as any).runCodeTest).toBe('test');
-    expect((sandbox1.contentWindow as any).promotionTest).toBe('promotion');
     expect((sandbox2.contentWindow as any).test).not.toBe('test');
     expect((sandbox2.contentWindow as any).runCodeTest).not.toBe('test');
-    expect((sandbox2.contentWindow as any).promotionTest).not.toBe('promotion');
     expect((window as any).test).not.toBe('test');
     expect((window as any).runCodeTest).not.toBe('test');
-    expect((window as any).promotionTest).not.toBe('promotion');
   })
 })
 
