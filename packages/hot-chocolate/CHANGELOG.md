@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.2.15-beta.0
+
+### Patch Changes
+
+- 9606fd2: 修复监听 window 事件时，丢失 passive，优化了 window 监听和清理方法,暂时不考虑全部变量提升的影响
+
 ## 0.2.14
 
 ### Patch Changes

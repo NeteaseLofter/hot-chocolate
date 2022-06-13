@@ -10,5 +10,7 @@
     "@hot-chocolate/plugin-dispatch": "0.1.1",
     "@hot-chocolate/plugin-request": "0.1.5"
   },
-  "changesets": []
+  "changesets": [
+    "six-eyes-drive"
+  ]
 }

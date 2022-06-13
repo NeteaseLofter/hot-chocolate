@@ -1,5 +1,12 @@
 # @hot-chocolate/plugin-request
 
+## 0.1.6-beta.0
+
+### Patch Changes
+
+- Updated dependencies [9606fd2]
+  - hot-chocolate@0.2.15-beta.0
+
 ## 0.1.5
 
 ### Patch Changes
