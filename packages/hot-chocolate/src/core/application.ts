@@ -58,12 +58,17 @@ export class Application {
 
   findOrActivate () {
     let sandbox;
+    let created = false;
     if (this.activatedSandbox.length > 0) {
       sandbox = this.activatedSandbox[0];
     } else {
       sandbox = this.activate();
+      created = true;
     }
-    return sandbox;
+    return {
+      sandbox,
+      created
+    };
   }
 
   removeActivatedSandbox (sandbox: Sandbox) {
