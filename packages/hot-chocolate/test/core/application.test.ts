@@ -30,7 +30,9 @@ describe('sandbox window isolation', () => {
   })
 
   test('findOrActivate can find', () => {
-    expect(app.findOrActivate()).toBe(sandbox1);
+    let { sandbox, created } = app.findOrActivate();
+    expect(sandbox).toBe(sandbox1);
+    expect(created).toBe(false);
   });
 
   test('set attr on window is isolation', () => {
@@ -155,7 +157,18 @@ describe('sandbox mount', () => {
     const app = new Application({
       name: 'testApp',
       sandboxOptions: {
-        htmlString: '<html><head><style>123</style><title>Hello World!</title></head><body><div>1</div><script>window.abc=1;</script><script src="/remote"></script></body></html>'
+        htmlString: `
+          <html>
+            <head>
+              <style>123</style>
+              <title>Hello World!</title>
+            </head>
+            <body>
+              <div>1</div>
+              <script>window.abc=1;</script>
+              <script src="/remote"></script>
+            </body>
+          </html>`.replace(/\n\s*/g , '')
       }
     });
     fetchMock.mockOnce(`window.eee=2;`);
@@ -163,10 +176,20 @@ describe('sandbox mount', () => {
     sandbox.mount(document.body);
     await sandbox.ready();
     expect(sandbox.parent.shadowRoot).toBe(sandbox.shadowRoot);
-    await sandbox.ready();
     const shadowRoot = sandbox.shadowRoot;
     expect(sandbox.shadowRoot.innerHTML).toBe((
-      `<html><head>${sandboxInitStyle}<style>123</style><title>Hello World!</title></head><body><div>1</div></body></html>`
+      `<html>
+        <head>
+          ${sandboxInitStyle}
+          <style>123</style>
+          <title>Hello World!</title>
+        </head>
+        <body>
+          <div>1</div>
+          <sandbox-fake-script-${uniqueId}>window.abc=1;</sandbox-fake-script-${uniqueId}>
+          <sandbox-fake-script-${uniqueId} src="/remote" for-src="/remote"></sandbox-fake-script-${uniqueId}>
+        </body>
+      </html>`.replace(/\n\s*/g , '')
     ));
     expect(shadowRoot.querySelector('title')?.innerHTML).toBe('Hello World!');
     expect(shadowRoot.querySelector('head style')).not.toBeNull();
@@ -183,14 +206,38 @@ describe('sandbox mount', () => {
         htmlRoot: '/htmlRoot'
       }
     });
-    fetchMock.mockOnce(`<html><head><style>123</style><title>Hello World!</title><link href="/remote-link" rel="stylesheet" /></head><body><div>1</div><script>window.abc=1;</script></body></html>`);
+    fetchMock.mockOnce(
+      `<html>
+        <head>
+          <style>123</style>
+          <title>Hello World!</title>
+          <link href="/remote-link" rel="stylesheet" />
+        </head>
+        <body>
+          <div>1</div>
+          <script>window.abc=1;</script>
+        </body>
+      </html>`.replace(/\n\s*/g , '')
+    );
     const sandbox = app.activate();
     sandbox.mount(document.body);
     await sandbox.ready();
     expect(sandbox.parent.shadowRoot).toBe(sandbox.shadowRoot);
     const shadowRoot = sandbox.shadowRoot;
     expect(sandbox.shadowRoot.innerHTML).toBe((
-      `<html><head>${sandboxInitStyle}<style>123</style><title>Hello World!</title><style></style><sandbox-fake-link-${uniqueId} href="/remote-link" rel="stylesheet"></sandbox-fake-link-${uniqueId}></head><body><div>1</div></body></html>`
+      `<html>
+        <head>
+          ${sandboxInitStyle}
+          <style>123</style>
+          <title>Hello World!</title>
+          <style></style>
+          <sandbox-fake-link-${uniqueId} href="/remote-link" rel="stylesheet"></sandbox-fake-link-${uniqueId}>
+        </head>
+        <body>
+          <div>1</div>
+          <sandbox-fake-script-${uniqueId}>window.abc=1;</sandbox-fake-script-${uniqueId}>
+        </body>
+      </html>`.replace(/\n\s*/g , '')
     ));
     expect(shadowRoot.querySelector('title')?.innerHTML).toBe('Hello World!');
     expect(shadowRoot.querySelector('head style')).not.toBeNull();

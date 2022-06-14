@@ -95,10 +95,12 @@ function replaceElementNode (
       let value = element.getAttribute(name);
       newElement.setAttribute(name, value as string);
     }
-
+    newElement.innerHTML = element.innerHTML;
   }
   return newElement;
 }
+
+let realConnecting = true;
 
 function modifyElementNode (
   element: Element,
@@ -126,38 +128,40 @@ function modifyElementNode (
         );
         return;
       }
+      realConnecting = false;
       const domParser = new DOMParser();
-      let allElements: NodeListOf<Element>;
+      let allChildElements: NodeListOf<Element>;
       let childContainer: HTMLElement;
       if (element.tagName.toUpperCase() === 'HEAD') {
         const doc = domParser.parseFromString('', 'text/html');
         doc.head.innerHTML = value;
-        allElements = doc.querySelectorAll('head *');
+        allChildElements = doc.querySelectorAll('head *');
         childContainer = doc.head;
       } else {
         const doc = domParser.parseFromString(value, 'text/html');
-        allElements = doc.querySelectorAll('body *');
+        allChildElements = doc.querySelectorAll('body *');
         childContainer = doc.body;
       }
 
-      for(let i = 0; i < allElements.length; i++) {
-        let element = allElements[i];
-        let currentElement;
-        if (element.nodeType === 1) {
-          currentElement = replaceElementNode(
-            element as HTMLElement,
+      for(let i = 0; i < allChildElements.length; i++) {
+        let childElement = allChildElements[i];
+        let currentChildElement;
+        if (childElement.nodeType === 1) {
+          currentChildElement = replaceElementNode(
+            childElement as HTMLElement,
             sandbox
           )
         }
-        if (currentElement) {
-          element.parentNode?.replaceChild(
-            currentElement,
-            element
+        if (currentChildElement) {
+          childElement.parentNode?.replaceChild(
+            currentChildElement,
+            childElement
           );
         } else {
-          modifyElementNode(allElements[i], proxyDocument, sandbox)
+          modifyElementNode(childElement, proxyDocument, sandbox)
         }
       }
+      realConnecting = true;
 
       // element..innerHTML = '';
       Reflect.set(prototype, 'innerHTML', '', element);
@@ -201,7 +205,8 @@ class FakeScriptElement extends HTMLElement {
         this.loadAndRunCode(
           {
             type: 'remote',
-            url: src
+            url: src,
+            async: !!this.getAttribute('async')
           },
           () => {
             if (!this.mounted) return;
@@ -229,6 +234,7 @@ class FakeScriptElement extends HTMLElement {
     this.mounted = false;
   }
   connectedCallback () {
+    if (!realConnecting) return;
     this.mounted = true;
     this._tryLoadScript();
   }
@@ -237,7 +243,9 @@ class FakeScriptElement extends HTMLElement {
 const fakeScriptName = `sandbox-fake-script-${uniqueId}`;
 customElements.define(fakeScriptName, FakeScriptElement);
 
-function createFakeScriptElement (loadAndRunCode: LoadAndRunCode) {
+function createFakeScriptElement (
+  loadAndRunCode: LoadAndRunCode
+) {
   let fakeScript = document.createElement(fakeScriptName) as FakeScriptElement;
   fakeScript.loadAndRunCode = loadAndRunCode;
 
@@ -430,6 +438,7 @@ class FakeLinkElement extends HTMLElement {
     this.realElement.parentNode?.removeChild(this.realElement)
   }
   connectedCallback () {
+    if (!realConnecting) return;
     this.mounted = true;
     this.__appendRealElement();
     this.__loadStyle();

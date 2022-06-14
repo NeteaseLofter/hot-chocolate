@@ -182,7 +182,7 @@ export class Sandbox {
       html,
       body,
       head,
-      readyPromise
+      readyPromise: shadowDomReadyPromise
     } = createShadowDom(
       this,
       hooks,
@@ -207,7 +207,9 @@ export class Sandbox {
     )
 
     this.readyPromise = new Promise(async (resolve) => {
-      const { htmlScripts } = await readyPromise;
+      await shadowDomReadyPromise;
+      await this.runRemoteCodeQueue();
+
       const exCSSResources = [
         // ...htmlCSSLinks,
         ...(
@@ -225,7 +227,6 @@ export class Sandbox {
  
 
       const exJSResources = [
-        ...htmlScripts,
         ...(
           resource && resource.js
             ? resource.js.map((js) => ({
@@ -239,7 +240,6 @@ export class Sandbox {
       for (let i = 0; i < exJSResources.length; i++) {
         await this.loadAndRunCode(exJSResources[i]);
       }
-
 
       try {
         (this.contentWindow.document as any).readyState = 'interactive';
@@ -349,11 +349,33 @@ export class Sandbox {
     styleElement.innerHTML = cssString;
   }
 
+  private remoteCodeQueue: null | (Parameters<Sandbox['runRemoteCode']>)[] = [];
+
+  private async runRemoteCodeQueue () {
+    const remoteCodeQueue = this.remoteCodeQueue;
+    if (!remoteCodeQueue) return;
+    this.remoteCodeQueue = null;
+    for (let i = 0; i < remoteCodeQueue.length; i++) {
+      const [url, callback] = remoteCodeQueue[i];
+      await this.runRemoteCode(url, callback);
+    }
+  }
   /**
    * 运行js脚本，可以是远程或者脚本字符串
    */
-  public loadAndRunCode (script: HtmlScript, callback?: () => void) {
+  public loadAndRunCode (
+    script: HtmlScript,
+    callback?: () => void
+  ) {
     if (script.type === 'remote') {
+      if (
+        this.contentWindow.document.readyState === 'loading'
+        && !script.async
+        && this.remoteCodeQueue
+      ) {
+        this.remoteCodeQueue.push([script.url, callback]);
+        return;
+      }
       return this.runRemoteCode(script.url, callback);
     } else {
       return this.runCode(script.content);

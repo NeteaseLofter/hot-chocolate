@@ -55,7 +55,8 @@ interface LocalHtmlScript {
 }
 interface RemoteHtmlScript {
   type: 'remote',
-  url: string
+  url: string,
+  async?: boolean
 }
 
 export type HtmlScript = LocalHtmlScript|RemoteHtmlScript;
@@ -65,49 +66,14 @@ export type HtmlLink = {
 
 export function parserHTMLString (htmlString: string) {
   const domParser = new DOMParser();
-  let htmlScripts: HtmlScript[] = [];
   // let htmlCSSLinks: HtmlLink[] = [];
   let defaultDom: Document;
 
   htmlString = htmlString.replace(/<noscript>.*?<\/noscript>/, '');
   defaultDom = domParser.parseFromString(htmlString, 'text/html');
-    const scriptNodes = defaultDom.getElementsByTagName('script');
-    (Array.prototype.slice.call(scriptNodes, 0) as HTMLScriptElement[])
-      .forEach((scriptElement) => {
-        if (
-          !scriptElement.type
-          || scriptElement.type === 'application/javascript'
-        ) {
-          const src = scriptElement.getAttribute('src');
-          if(src) {
-            htmlScripts.push({
-              type: 'remote',
-              url: src
-            })
-          } else if (scriptElement.innerHTML) {
-            htmlScripts.push({
-              type: 'local',
-              content: scriptElement.innerHTML
-            })
-          }
 
-          if (scriptElement.parentNode) {
-            scriptElement.parentNode.removeChild(scriptElement);
-          }
-        }
-      })
-
-    // const cssLinkNodes = defaultDom.querySelectorAll('link[rel=stylesheet]');
-    // (Array.prototype.slice.call(cssLinkNodes, 0) as HTMLLinkElement[])
-    //   .forEach((linkElement) => {
-    //     htmlCSSLinks.push({ url: linkElement.href });
-    //     if (linkElement.parentNode) {
-    //       linkElement.parentNode.removeChild(linkElement);
-    //     }
-    //   })
   return {
-    defaultDom,
-    htmlScripts
+    defaultDom
   }
 }
 
@@ -145,16 +111,14 @@ export function createShadowDom (
     }
 
     return {
-      defaultDom: null,
-      htmlScripts: []
+      defaultDom: null
     }
   }
 
 
   const initHTML = async () => {
     const {
-      defaultDom,
-      ...other
+      defaultDom
     } = await parserHTML();
 
     if (defaultDom) {
@@ -195,7 +159,7 @@ export function createShadowDom (
       fakeHead.appendChild(initStyle);
     }
 
-    return other;
+    return true;
   }
 
 
