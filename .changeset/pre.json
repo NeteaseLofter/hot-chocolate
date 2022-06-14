@@ -11,6 +11,8 @@
     "@hot-chocolate/plugin-request": "0.1.5"
   },
   "changesets": [
+    "lovely-trainers-play",
+    "orange-pillows-relax",
     "six-eyes-drive"
   ]
 }

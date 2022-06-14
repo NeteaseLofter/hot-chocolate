@@ -1,5 +1,12 @@
 # hot-chocolate
 
+## 0.2.15-beta.1
+
+### Patch Changes
+
+- 5a7de8f: 优化 sandbox 初始化的时候对 script 标签的生成方式
+- 198f7bf: 修改 findOrActivate 会返回是否新建的 sandbox
+
 ## 0.2.15-beta.0
 
 ### Patch Changes
