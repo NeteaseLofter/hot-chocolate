@@ -4,6 +4,8 @@
 
 > 在沙箱中运行你的JS
 
+![](./examples/demo.gif);
+
 ## 安装
 ```
 npm install hot-chocolate;
