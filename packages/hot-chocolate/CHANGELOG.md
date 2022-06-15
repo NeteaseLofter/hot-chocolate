@@ -1,5 +1,13 @@
 # hot-chocolate
 
+## 0.2.15
+
+### Patch Changes
+
+- 5a7de8f: 优化 sandbox 初始化的时候对 script 标签的生成方式
+- 198f7bf: 修改 findOrActivate 会返回是否新建的 sandbox
+- 9606fd2: 修复监听 window 事件时，丢失 passive，优化了 window 监听和清理方法,暂时不考虑全部变量提升的影响
+
 ## 0.2.15-beta.1
 
 ### Patch Changes
