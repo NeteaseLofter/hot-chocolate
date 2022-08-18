@@ -358,15 +358,24 @@ export class Sandbox {
     styleElement.innerHTML = cssString;
   }
 
-  private remoteCodeQueue: null | (Parameters<Sandbox['runRemoteCode']>)[] = [];
+  private remoteCodeQueue: null | (
+    {
+      script: HtmlScript,
+      callback?: () => void
+    }[]
+   ) = [];
 
   private async runRemoteCodeQueue () {
     const remoteCodeQueue = this.remoteCodeQueue;
     if (!remoteCodeQueue) return;
     this.remoteCodeQueue = null;
     for (let i = 0; i < remoteCodeQueue.length; i++) {
-      const [url, callback] = remoteCodeQueue[i];
-      await this.runRemoteCode(url, callback);
+      const { script, callback }= remoteCodeQueue[i];
+      await this.loadAndRunCode(
+        script,
+        callback,
+        true
+      );
     }
   }
   /**
@@ -374,17 +383,21 @@ export class Sandbox {
    */
   public loadAndRunCode (
     script: HtmlScript,
-    callback?: () => void
+    callback?: () => void,
+    ignoreReadyState?: boolean
   ) {
+    if (
+      !ignoreReadyState
+      && this.contentWindow.document.readyState === 'loading'
+      && this.remoteCodeQueue
+    ) {
+      this.remoteCodeQueue.push({
+        script,
+        callback
+      });
+      return;
+    }
     if (script.type === 'remote') {
-      if (
-        this.contentWindow.document.readyState === 'loading'
-        && !script.async
-        && this.remoteCodeQueue
-      ) {
-        this.remoteCodeQueue.push([script.url, callback]);
-        return;
-      }
       return this.runRemoteCode(script.url, callback);
     } else {
       return this.runCode(script.content);
