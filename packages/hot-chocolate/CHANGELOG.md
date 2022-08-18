@@ -1,5 +1,12 @@
 # hot-chocolate
 
+## 0.2.16
+
+### Patch Changes
+
+- 8e9225b: 1. 自动注入一些沙箱的环境数据
+  2. 针对模拟的 script 标签的 innerHTML 做特殊处理
+
 ## 0.2.15
 
 ### Patch Changes
