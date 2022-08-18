@@ -161,7 +161,16 @@ export class Sandbox {
       proxyWindow,
       runCode
     } = createContentWindow(
-      hooks
+      hooks,
+      {
+        /**
+         * 自动注入一些沙箱的环境数据
+         */
+        __SANDBOX_ENV: {
+          htmlRoot,
+          htmlRemote
+        }
+      }
     );
 
     this.contentWindow = proxyWindow;
@@ -224,7 +233,7 @@ export class Sandbox {
       for (let i = 0; i < exCSSResources.length; i++) {
         await this.appendRemoteCSS(exCSSResources[i].url);
       }
- 
+
 
       const exJSResources = [
         ...(

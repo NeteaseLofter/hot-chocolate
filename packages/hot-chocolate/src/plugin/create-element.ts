@@ -189,6 +189,28 @@ class FakeScriptElement extends HTMLElement {
     super()
   }
 
+  private _savedContent: string = '';
+
+  /**
+   * script的innerHTML比较特殊，需要特殊处理
+   */
+  set innerHTML (newInnerHTML: string) {
+    this._savedContent = newInnerHTML;
+  };
+
+  get innerHTML () {
+    return this._savedContent;
+  };
+
+  set innerText (newInnerText: string) {
+    this._savedContent = newInnerText;
+  };
+
+  get innerText () {
+    return this._savedContent;
+  };
+
+
   private _tryLoadScript () {
     const src = this.src || this.getAttribute('src');
     const type = this.type || this.getAttribute('type')
@@ -201,7 +223,6 @@ class FakeScriptElement extends HTMLElement {
       )
     ) {
       if (src) {
-        this.setAttribute('for-src', src);
         this.loadAndRunCode(
           {
             type: 'remote',
@@ -222,7 +243,7 @@ class FakeScriptElement extends HTMLElement {
         this.loadAndRunCode(
           {
             type: 'local',
-            content: _self.innerHTML
+            content: _self._savedContent
           },
           () => {}
         );

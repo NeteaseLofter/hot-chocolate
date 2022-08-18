@@ -186,8 +186,8 @@ describe('sandbox mount', () => {
         </head>
         <body>
           <div>1</div>
-          <sandbox-fake-script-${uniqueId}>window.abc=1;</sandbox-fake-script-${uniqueId}>
-          <sandbox-fake-script-${uniqueId} src="/remote" for-src="/remote"></sandbox-fake-script-${uniqueId}>
+          <sandbox-fake-script-${uniqueId}></sandbox-fake-script-${uniqueId}>
+          <sandbox-fake-script-${uniqueId} src="/remote"></sandbox-fake-script-${uniqueId}>
         </body>
       </html>`.replace(/\n\s*/g , '')
     ));
@@ -235,7 +235,7 @@ describe('sandbox mount', () => {
         </head>
         <body>
           <div>1</div>
-          <sandbox-fake-script-${uniqueId}>window.abc=1;</sandbox-fake-script-${uniqueId}>
+          <sandbox-fake-script-${uniqueId}></sandbox-fake-script-${uniqueId}>
         </body>
       </html>`.replace(/\n\s*/g , '')
     ));

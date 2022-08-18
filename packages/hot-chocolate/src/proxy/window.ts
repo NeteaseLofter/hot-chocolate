@@ -35,7 +35,8 @@ export interface ProxyWindow extends Window {
 }
 
 export function createContentWindow (
-  hooks: WindowHooks
+  hooks: WindowHooks,
+  options?: any
 ) {
   const rawWindow = window;
 
@@ -44,6 +45,7 @@ export function createContentWindow (
       return typeof (window as any)[propKey] === 'function';
     });
   const proxyWindow: ProxyWindow = new Proxy({
+    ...options,
     __RUN_IN_SANDBOX: true
   } as ProxyWindow, {
     has (target, property) {
