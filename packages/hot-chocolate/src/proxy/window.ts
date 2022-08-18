@@ -65,10 +65,6 @@ export function createContentWindow (
       // return true;
     },
     get (target, property, receiver) {
-      if (property === 'window' || property === 'globalThis' || property === 'self') {
-        return proxyWindow;
-      }
-
       const { isEnd, result } = hooks.window.evoke('get', target, property, receiver, rawWindow);
       if (isEnd) return result;
 

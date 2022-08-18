@@ -371,11 +371,18 @@ export class Sandbox {
     this.remoteCodeQueue = null;
     for (let i = 0; i < remoteCodeQueue.length; i++) {
       const { script, callback }= remoteCodeQueue[i];
-      await this.loadAndRunCode(
-        script,
-        callback,
-        true
-      );
+      /**
+       * 队列执行时，报错阻塞运行
+       */
+      try {
+        await this.loadAndRunCode(
+          script,
+          callback,
+          true
+        );
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
   /**
