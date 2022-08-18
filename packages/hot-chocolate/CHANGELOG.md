@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.2.18
+
+### Patch Changes
+
+- 队列运行 js 时添加 try-catch 不阻塞下一个的执行
+
 ## 0.2.17
 
 ### Patch Changes
