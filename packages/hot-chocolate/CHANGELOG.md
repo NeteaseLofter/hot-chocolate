@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.2.17
+
+### Patch Changes
+
+- b3b702e: 非远程 script 的代码也会在加载队列中执行
+
 ## 0.2.16
 
 ### Patch Changes
