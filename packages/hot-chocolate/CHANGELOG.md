@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.2.19
+
+### Patch Changes
+
+- 016bdf2: 修复http://协议判断的正则
+
 ## 0.2.18
 
 ### Patch Changes
