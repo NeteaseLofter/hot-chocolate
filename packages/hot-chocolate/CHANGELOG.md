@@ -1,5 +1,12 @@
 # hot-chocolate
 
+## 0.2.20
+
+### Patch Changes
+
+- 15b7887: 为模拟的 script 标签，补全 src,type 的属性的 get 和 set
+- 15b7887: 修改协议正则为【\w+:】支持 data:的 base64 图片
+
 ## 0.2.19
 
 ### Patch Changes
