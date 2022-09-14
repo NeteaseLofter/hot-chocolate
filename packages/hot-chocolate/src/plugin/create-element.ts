@@ -180,8 +180,6 @@ function modifyElementNode (
 }
 
 class FakeScriptElement extends HTMLElement {
-  src?: string;
-  type?: string;
   mounted: boolean = false;
   loadAndRunCode!: LoadAndRunCode;
 
@@ -210,10 +208,26 @@ class FakeScriptElement extends HTMLElement {
     return this._savedContent;
   };
 
+  get src () {
+    return this.getAttribute('src') || '';
+  }
+
+  set src (newValue: string) {
+    this.setAttribute('src', newValue);
+  }
+
+  get type () {
+    return this.getAttribute('type') || '';
+  }
+
+  set type (newValue: string) {
+    this.setAttribute('type', newValue);
+  }
+
 
   private _tryLoadScript () {
-    const src = this.src || this.getAttribute('src');
-    const type = this.type || this.getAttribute('type')
+    const src = this.src;
+    const type = this.type;
     const _self = this;
     if (
       (
