@@ -6,9 +6,9 @@
     "setup": "pnpm install",
     "changeset": "changeset",
     "version": "changeset version",
-    "build": "pnpm run build -r",
-    "test": "pnpm test -r",
-    "examples": "pnpm run build --filter ./packages && pnpm run start --filter ./examples"
+    "build": "pnpm -r run build",
+    "test": "pnpm  -r test",
+    "examples": "pnpm --filter ./packages run build  && pnpm --filter ./examples run start"
   },
   "license": "MIT",
   "private": true,
