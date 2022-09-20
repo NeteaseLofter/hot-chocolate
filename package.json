@@ -3,17 +3,19 @@
   "version": "0.1.4",
   "description": "",
   "scripts": {
-    "setup": "pnpm install",
+    "setup": "npx pnpm install",
     "changeset": "changeset",
     "version": "changeset version",
-    "build": "pnpm -r run build",
-    "test": "pnpm  -r test",
-    "examples": "pnpm --filter ./packages run build  && pnpm --filter ./examples run start"
+    "build": "npx pnpm -r run build",
+    "test": "npx pnpm  -r test",
+    "examples": "npx pnpm --filter ./examples/* run build  && npx pnpm --filter ./examples/* run start"
   },
   "license": "MIT",
   "private": true,
   "devDependencies": {
     "@changesets/cli": "^2.14.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "pnpm": "^7.12.1"
+  }
 }
