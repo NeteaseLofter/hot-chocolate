@@ -9,8 +9,7 @@ export function getElementPlugin (hooks: SandboxHooks) {
   hooks.document.register('get', (end, proxyDocument, property, receiver, rawDocument) => {
     if (property === 'getElementsByTagName') {
       return end((tagName: string) => {
-        const shadowRoot = currentSandbox.shadowRoot;
-        return shadowRoot.querySelectorAll(tagName);
+        return rawDocument.getElementsByTagName(tagName);
       });
     }
 
@@ -31,14 +30,13 @@ export function getElementPlugin (hooks: SandboxHooks) {
     if (property === 'getElementById') {
       return end((id: string) => {
         const shadowRoot = currentSandbox.shadowRoot;
-        return shadowRoot.querySelector('#' + id);
+        return shadowRoot.getElementById(id);
       });
     }
 
     if (property === 'getElementsByClassName') {
       return end((className: string) => {
-        const shadowRoot = currentSandbox.shadowRoot;
-        return shadowRoot.querySelectorAll('.' + className);
+        return rawDocument.getElementsByClassName(className);
       });
     }
   })
