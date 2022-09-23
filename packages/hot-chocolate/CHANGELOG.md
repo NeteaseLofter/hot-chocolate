@@ -1,5 +1,12 @@
 # hot-chocolate
 
+## 0.2.21
+
+### Patch Changes
+
+- 8b65f60: 修复 getElementById 使用 querySelector 报错
+- 83fc4ee: 使用 shadowRoot.children 获取 dom 节点
+
 ## 0.2.20
 
 ### Patch Changes
@@ -11,7 +18,7 @@
 
 ### Patch Changes
 
-- 016bdf2: 修复http://协议判断的正则
+- 016bdf2: 修复 http://协议判断的正则
 
 ## 0.2.18
 
@@ -29,8 +36,7 @@
 
 ### Patch Changes
 
-- 8e9225b: 1. 自动注入一些沙箱的环境数据
-  2. 针对模拟的 script 标签的 innerHTML 做特殊处理
+- 8e9225b: 1. 自动注入一些沙箱的环境数据 2. 针对模拟的 script 标签的 innerHTML 做特殊处理
 
 ## 0.2.15
 
@@ -99,18 +105,14 @@
 
 ### Patch Changes
 
-- 95155d7: 1. css font-face 相对路径支持
-  2. link onload 支持
+- 95155d7: 1. css font-face 相对路径支持 2. link onload 支持
 - 95155d7: link href 重复设置导致前缀丢失
 
 ## 0.2.6
 
 ### Patch Changes
 
-- 62f2619: 1. css 内容支持 replaceCSSString 进行修改
-  2. 自动替换:root 为:host
-  3. 自动提升 font-face 以支持字体文件
-  4. htmlString 中 style 和 link 标签的添加逻辑修改，和动态添加保持一致
+- 62f2619: 1. css 内容支持 replaceCSSString 进行修改 2. 自动替换:root 为:host 3. 自动提升 font-face 以支持字体文件 4. htmlString 中 style 和 link 标签的添加逻辑修改，和动态添加保持一致
 
 ## 0.2.5
 
