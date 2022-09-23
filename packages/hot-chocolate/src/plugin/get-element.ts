@@ -9,7 +9,8 @@ export function getElementPlugin (hooks: SandboxHooks) {
   hooks.document.register('get', (end, proxyDocument, property, receiver, rawDocument) => {
     if (property === 'getElementsByTagName') {
       return end((tagName: string) => {
-        return rawDocument.getElementsByTagName(tagName);
+        const shadowRoot = currentSandbox.shadowRoot;
+        return shadowRoot.children[0] ? shadowRoot.children[0].getElementsByTagName(tagName) : null;
       });
     }
 
@@ -36,7 +37,8 @@ export function getElementPlugin (hooks: SandboxHooks) {
 
     if (property === 'getElementsByClassName') {
       return end((className: string) => {
-        return rawDocument.getElementsByClassName(className);
+        const shadowRoot = currentSandbox.shadowRoot;
+        return shadowRoot.children[0] ? shadowRoot.children[0].getElementsByClassName(className) : null;
       });
     }
   })
