@@ -1,3 +1,0 @@
-[build]
-base = /react15
-command = "pnpm run build" 

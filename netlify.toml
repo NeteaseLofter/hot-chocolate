@@ -7,11 +7,13 @@ to = "project-1.netlify.app/:splat"
 status = 200
 force = true
 
+[[redirects]]
 from = "examples/react15/dist"
 to = "react15.netlify.app/:splat"
 status = 200
 force = true
 
+[[redirects]]
 from = "examples/react16/dist"
 to = "react16.netlify.app/:splat"
 status = 200

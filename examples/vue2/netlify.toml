@@ -1,3 +1,0 @@
-[build]
-base = /vue2
-command = "pnpm run build" 
