@@ -1,0 +1,3 @@
+[build]
+base = /react16
+command = "pnpm run build" 
