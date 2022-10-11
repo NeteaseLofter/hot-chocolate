@@ -85,6 +85,20 @@ sandbox.ready().then(() => {
 })
 ```
 
+## 本地运行examples
+1. 先clone本仓库
+```bash
+git clone https://github.com/NeteaseLofter/hot-chocolate.git
+```
+2. 安装依赖，也可使用pnpm
+```bash
+npm run setup
+```
+3. 运行本地例子，会使用3000端口
+```bash
+npm run examples
+```
+
 ## 更多文档
 [更多使用例子](./examples/README.md)
 [hot-chocolate详细指南](https://github.com/NeteaseLofter/hot-chocolate/tree/master/packages/hot-chocolate)
