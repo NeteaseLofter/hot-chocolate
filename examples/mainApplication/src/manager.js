@@ -5,6 +5,7 @@ import {
 import {
   createSandboxDispatchPlugin
 } from '@hot-chocolate/plugin-dispatch';
+import NewFunctionPlugin from './plugins/new-function';
 function CustomPlugin(
   hooks,
   application // 启动插件的application
@@ -58,7 +59,8 @@ export const manager = new Manager(
   ],
   [
     CustomPlugin, //自己写了一个插件，插件示例，禁止localstorage使用
-    createSandboxDispatchPlugin() // 使用调用插件
+    createSandboxDispatchPlugin(), // 使用调用插件
+    NewFunctionPlugin,
   ],
 );
 

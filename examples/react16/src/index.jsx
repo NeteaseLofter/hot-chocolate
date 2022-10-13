@@ -25,6 +25,10 @@ function Example() {
       <p>You clicked {count} times</p>
       <button
         onClick={() =>{
+          const func = new Function(`console.log(window.test)`);
+          console.log(func());
+          // const result = func(1, 2);
+          // console.log('result', result);
           setCount(count + 1);
           // localStorage.setItem('myCat', 'Tom');
           // console.log( localStorage.getItem('myCat'))
