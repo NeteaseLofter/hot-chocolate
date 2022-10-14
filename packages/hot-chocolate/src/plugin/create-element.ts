@@ -151,6 +151,13 @@ function modifyElementNode (
             childElement as HTMLElement,
             sandbox
           )
+          const onclickAttr = childElement.getAttribute('onclick');
+          if (onclickAttr) {
+            // console.log('childElement', childElement, onclickAttr);
+            childElement.removeAttribute('onclick');
+            // @ts-ignore
+            childElement.onclick = new Function('g', `with(g){\nfunction tempFunc(event){${onclickAttr}}\n};return tempFunc`)(sandbox.contentWindow);
+          }
         }
         if (currentChildElement) {
           childElement.parentNode?.replaceChild(

@@ -1,4 +1,4 @@
-import React,{ useState } from 'react';
+import React,{ useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
 import './style.css'
@@ -16,6 +16,15 @@ import './style.css'
 function Example() {
   // 声明一个新的叫做 “count” 的 state 变量
   const [count, setCount] = useState(0);
+  // useEffect(() => {
+  //   document.documentElement.addEventListener('click', e => {
+  //     e.preventDefault();
+  //     e.stopPropagation();
+  //     console.log('prevent');
+  //   }, {
+  //     capture: true,
+  //   })
+  // }, [])
   return (
     <div className="box">
       <img
@@ -26,10 +35,14 @@ function Example() {
       <button
         onClick={() =>{
           const func = new Function(`console.log(window.test)`);
-          console.log(func());
+          const add = new Function('a', 'b', 'return a + b;');
+          func();
+          console.log('add result', add(1, 2));
           // const result = func(1, 2);
-          // console.log('result', result);
-          setCount(count + 1);
+          // // console.log('result', result);
+          // setCount(count + 1);
+          // const box = document.querySelector('.box');
+          // console.log(box.test);
           // localStorage.setItem('myCat', 'Tom');
           // console.log( localStorage.getItem('myCat'))
         }}

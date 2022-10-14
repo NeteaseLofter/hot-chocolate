@@ -7,7 +7,7 @@ export default function NewFunctionPlugin(
     'get',
     (end, proxyWindow, property, receiver, rawWindow) => {
       if (property === 'test') {
-        console.log('get test');
+        console.log('get injected window.test value');
         return end(1)
       }
       if (property === 'Function') {

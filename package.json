@@ -8,7 +8,9 @@
     "version": "changeset version",
     "build": "npx pnpm -r run build",
     "test": "npx pnpm  -r test",
-    "examples": "npx pnpm --filter './packages/*' run build && npx pnpm --filter './examples/*' run start"
+    "examples": "npx pnpm --filter './packages/*' run build && npx pnpm --filter './examples/*' run start",
+    "start-examples": "npx pnpm --filter './examples/*' run start",
+    "build-packages": "npx pnpm --filter './packages/*' run build"
   },
   "license": "MIT",
   "private": true,
