@@ -18,9 +18,9 @@ export default function NewFunctionPlugin(
               const args = Array.from(arguments);
               const functionArgs = args.slice(0, -1);
               const functionBody = args.slice(-1);
-              console.log('FakeFunction constructor', arguments, args, functionArgs, functionBody);
+              // console.log('FakeFunction constructor', arguments, args, functionArgs, functionBody);
               
-              return new Function('g', `with(g){\nconsole.log(window.test)\nfunction tempFunc(${functionArgs.join(',')}){${functionBody}}\n};return tempFunc`)(proxyWindow);
+              return new Function('g', `with(g){\nfunction tempFunc(${functionArgs.join(',')}){${functionBody}}\n};return tempFunc`)(receiver);
             }
           }
           return FakeFunction;

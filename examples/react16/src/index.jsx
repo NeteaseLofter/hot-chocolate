@@ -34,10 +34,11 @@ function Example() {
       <p>You clicked {count} times</p>
       <button
         onClick={() =>{
-          const func = new Function(`console.log(window.test)`);
-          const add = new Function('a', 'b', 'return a + b;');
+          const func = new Function(`console.log('react16 new Function', window.test)`);
+          // const add = new Function('a', 'b', 'return a + b;');
           func();
-          console.log('add result', add(1, 2));
+          // console.log(window.test);
+          // console.log('add result', add(1, 2));
           // const result = func(1, 2);
           // // console.log('result', result);
           // setCount(count + 1);
