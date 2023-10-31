@@ -3,7 +3,11 @@ import type { Hook } from './hooks';
 import {
   SandboxShadowHostElement
 } from '../proxy/shadow-dom';
-import type { ShadowDomHooks, HtmlScript } from '../proxy/shadow-dom';
+import type {
+  ShadowDomHooks,
+  HtmlScript,
+  RemoteHtmlScript
+} from '../proxy/shadow-dom';
 import { createDocument } from '../proxy/document';
 import type { DocumentHooks } from '../proxy/document';
 import { createContentWindow } from '../proxy/window';
@@ -446,9 +450,17 @@ export class Sandbox {
       return;
     }
     if (script.type === 'remote') {
-      return this.runRemoteCode(script.url, callback);
+      return this.runRemoteCode(script, callback);
     } else {
-      return this.runCode(script.content);
+      const proxyDocument = this.contentWindow.document;
+      if (script.node) {
+        Reflect.set(proxyDocument, 'currentScript', script.node);
+      }
+      const result = this.runCode(script.content);
+      if (script.node) {
+        Reflect.set(proxyDocument, 'currentScript', null);
+      }
+      return result;
     }
   }
 
@@ -456,11 +468,29 @@ export class Sandbox {
    * 通过url运行远程js脚本
    * 注意跨域问题
    */
-  public runRemoteCode (remoteScriptUrl: string, callback?: () => void) {
+  public runRemoteCode (
+    remoteScript: RemoteHtmlScript | string,
+    callback?: () => void
+  ) {
+    let remoteScriptUrl: string;
+    let remoteScriptNode: HTMLScriptElement | undefined;
+    if (typeof remoteScript === 'string') {
+      remoteScriptUrl = remoteScript;
+    } else {
+      remoteScriptUrl = remoteScript.url;
+      remoteScriptNode = remoteScript.node;
+    }
     remoteScriptUrl = this.getRemoteURLWithHtmlRoot(remoteScriptUrl);
+    const proxyDocument = this.contentWindow.document;
     return this.loadResource(remoteScriptUrl)
       .then((scriptString) => {
+        if (remoteScriptNode) {
+          Reflect.set(proxyDocument, 'currentScript', remoteScript.node);
+        }
         this.runCode(scriptString, remoteScriptUrl);
+        if (remoteScriptNode) {
+          Reflect.set(proxyDocument, 'currentScript', null);
+        }
         callback && callback();
       }, () => {
         // fetch error：比如跨域失败

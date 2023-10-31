@@ -50,17 +50,19 @@ interface ShadowDomResult {
   >;
 }
 
-interface LocalHtmlScript {
-  type: 'local',
-  content: string
+export interface LocalHtmlScript {
+  type: 'local';
+  content: string;
+  node?: HTMLScriptElement;
 }
-interface RemoteHtmlScript {
-  type: 'remote',
-  url: string,
-  async?: boolean
+export interface RemoteHtmlScript {
+  type: 'remote';
+  url: string;
+  async?: boolean;
+  node?: HTMLScriptElement;
 }
 
-export type HtmlScript = LocalHtmlScript|RemoteHtmlScript;
+export type HtmlScript = LocalHtmlScript | RemoteHtmlScript;
 export type HtmlLink = {
   url: string
 }

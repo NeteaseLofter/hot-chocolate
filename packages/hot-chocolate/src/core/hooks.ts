@@ -1,14 +1,23 @@
 
 
-export class Hook<T extends {[name: string]: { args: any[], result?: any}} = any> {
+export class Hook<
+T extends {[name: string]: { args: any[], result?: any}} = any
+> {
   protected _registeredHooks = {} as {
     [propsName: string]: any;
   };
 
-  register<K extends keyof T> (
+  register<
+    K extends keyof T,
+    R = T[K]['result'],
+    End = {
+      (result: R): void;
+      decorator: (decorator: (result: R) => R) => void;
+    }
+  > (
     name: K,
     callback: (
-      end: (result: T[K]['result']) => void,
+      end: End,
       ...args: (T[K]['args'])
     ) => void
   ) {
@@ -20,8 +29,15 @@ export class Hook<T extends {[name: string]: { args: any[], result?: any}} = any
     namedRegisteredHooks.push(callback);
   }
 
-  evoke (
-    name: keyof T,
+  evoke<
+      K extends keyof T,
+      R = T[K]['result'],
+      End = {
+        (result: R): void;
+        decorator: (decorator: (result: R) => R) => void;
+      }
+    > (
+    name: K,
     ...args: T[typeof name]['args']
   ): {
     isEnd: boolean,
@@ -30,14 +46,18 @@ export class Hook<T extends {[name: string]: { args: any[], result?: any}} = any
     const namedRegisteredHooks = this._registeredHooks[name as string];
     let isEnd = false;
     let result;
+    let decorator: (result: R) => R;
     if (namedRegisteredHooks) {
-      const end = (endResult: any) => {
+      const end: End = ((endResult: R) => {
         if (isEnd) {
           console.error('end 不能重复调用');
           return;
         }
         isEnd = true;
-        result = endResult;
+        result = decorator ? decorator(endResult) : endResult;
+      }) as End;
+      (end as any).decorator = (newDecorator: any) => {
+        decorator = newDecorator;
       }
       namedRegisteredHooks.forEach((hookCallback: any) => {
         if (!isEnd) {

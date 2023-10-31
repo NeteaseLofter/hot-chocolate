@@ -63,3 +63,31 @@ test('ownerDocument with innerHTML', async () => {
   expect(shadowRoot.querySelector('body div')?.ownerDocument)
     .toBe(sandbox.contentWindow.document);
 });
+
+test('document.getElementsByTagName', async () => {
+  const app = new Application({
+    name: 'testApp',
+    sandboxOptions: {
+      htmlString: `
+        <html><head></head><body>
+        <script>window.a=1</script>
+        <script src="/a"></script>
+      </body></html>`
+    }
+  });
+  const sandbox = app.activate();
+  sandbox.mount(document.body);
+  await sandbox.ready();
+  expect(
+    sandbox.contentWindow.document.getElementsByTagName('script').length
+  ).toBe(2);
+  expect(
+    (sandbox.contentWindow.window as any).a
+  ).toBe(1)
+  expect(
+    sandbox.contentWindow.document.getElementsByTagName('script')[0].innerHTML
+  ).toBe('window.a=1')
+  expect(
+    sandbox.contentWindow.document.getElementsByTagName('script')[1].src
+  ).toBe('/a')
+});

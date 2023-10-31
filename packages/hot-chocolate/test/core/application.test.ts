@@ -252,4 +252,26 @@ describe('sandbox mount', () => {
     })
     expect((sandbox.contentWindow as any).relative).toBe(1);
   });
+
+  test('document.currentScript', async () => {
+    const app = new Application({
+      name: 'testApp',
+      sandboxOptions: {
+        htmlString: `
+          <html>
+            <head>
+            </head>
+            <body>
+              <script src="/remote"></script>
+            </body>
+          </html>`
+      }
+    });
+    fetchMock.mockOnce(`window.csc=document.currentScript.src;`);
+    const sandbox = app.activate();
+    sandbox.mount(document.body);
+    await sandbox.ready();
+    expect((sandbox.contentWindow as any).csc).toBe('/remote');
+    expect(sandbox.contentWindow.document.currentScript).toBe(null);
+  });
 })
