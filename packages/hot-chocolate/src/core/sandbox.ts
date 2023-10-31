@@ -485,7 +485,7 @@ export class Sandbox {
     return this.loadResource(remoteScriptUrl)
       .then((scriptString) => {
         if (remoteScriptNode) {
-          Reflect.set(proxyDocument, 'currentScript', remoteScript.node);
+          Reflect.set(proxyDocument, 'currentScript', remoteScriptNode);
         }
         this.runCode(scriptString, remoteScriptUrl);
         if (remoteScriptNode) {
