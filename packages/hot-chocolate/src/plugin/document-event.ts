@@ -10,8 +10,8 @@ export function documentEventPlugin (hooks: SandboxHooks) {
   hooks.document.register('get', (end, proxyDocument, property, receiver, rawDocument) => {
     if (property === 'addEventListener') {
       return end((type: string, callback: any, ...args: any) => {
-        const shadowRoot = currentSandbox.shadowRoot;
-        const fixCallback = fixEventTarget(callback, shadowRoot);
+        const shadowHostElement = currentSandbox.defaultShadowHostElement;
+        const fixCallback = fixEventTarget(callback, shadowHostElement);
         proxyDocumentListeners[
           callback
         ] = fixCallback;
@@ -38,11 +38,11 @@ export function documentEventPlugin (hooks: SandboxHooks) {
 
 function fixEventTarget (
   callback: any,
-  shadowRoot: ShadowRoot
+  targetElement: HTMLElement
 ) {
   return function (this: any, event: any) {
     let target = event.target;
-    if (target === shadowRoot.host) {
+    if (target === targetElement) {
       target = event.path[0];
     }
     Object.defineProperty(event, 'target', {

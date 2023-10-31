@@ -19,7 +19,7 @@ test('document activeElement is current', async () => {
   sandbox.mount(document.body);
   await sandbox.ready();
 
-  const shadowRoot = sandbox.shadowRoot;
+  const shadowRoot = sandbox.defaultShadowHostElement.shadowRoot;
   const input = (shadowRoot.querySelector('body input') as HTMLInputElement);
   input.focus();
   expect(sandbox.contentWindow.document.activeElement)
@@ -58,7 +58,7 @@ test('ownerDocument with innerHTML', async () => {
   });
   const sandbox = app.activate();
   sandbox.mount(document.body);
-  const shadowRoot = sandbox.shadowRoot;
+  const shadowRoot = sandbox.defaultShadowHostElement.shadowRoot;
   await sandbox.ready();
   expect(shadowRoot.querySelector('body div')?.ownerDocument)
     .toBe(sandbox.contentWindow.document);

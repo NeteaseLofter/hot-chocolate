@@ -12,10 +12,10 @@ export function createElementPlugin (hooks: SandboxHooks) {
   })
   hooks.document.register('get', (end, proxyDocument, property, receiver, rawDocument) => {
     if (property === 'activeElement') {
-      const shadowRoot = currentSandbox.shadowRoot;
+      const shadowHostElement = currentSandbox.defaultShadowHostElement;
       let activeElement = rawDocument.activeElement;
-      if (activeElement === shadowRoot.host) {
-        activeElement = shadowRoot.activeElement;
+      if (activeElement === shadowHostElement) {
+        activeElement = shadowHostElement.shadowRoot.activeElement;
       }
       return end(activeElement);
     }

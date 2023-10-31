@@ -135,12 +135,12 @@ describe('sandbox mount', () => {
     const sandbox = app.activate();
     expect(document.body.innerHTML).toBe('');
     expect(sandbox.mounted).toBe(false);
-    expect(sandbox.parent.parentNode).toBeNull();
+    expect(sandbox.defaultShadowHostElement.parentNode).toBeNull();
     sandbox.mount(document.body);
-    expect(sandbox.parent.parentNode).toBe(document.body);
+    expect(sandbox.defaultShadowHostElement.parentNode).toBe(document.body);
     expect(sandbox.mounted).toBe(true);
     sandbox.unmount();
-    expect(sandbox.parent.parentNode).toBeNull();
+    expect(sandbox.defaultShadowHostElement.parentNode).toBeNull();
     expect(sandbox.mounted).toBe(false);
     sandbox.destroy();
 
@@ -149,7 +149,7 @@ describe('sandbox mount', () => {
       .mockImplementation(() => {});
     sandbox.mount(document.body);
     expect(consoleSpy).toHaveBeenCalled();
-    expect(sandbox.parent.parentNode).toBeNull();
+    expect(sandbox.defaultShadowHostElement.parentNode).toBeNull();
     expect(sandbox.mounted).toBe(false);
   });
 
@@ -175,9 +175,8 @@ describe('sandbox mount', () => {
     const sandbox = app.activate();
     sandbox.mount(document.body);
     await sandbox.ready();
-    expect(sandbox.parent.shadowRoot).toBe(sandbox.shadowRoot);
-    const shadowRoot = sandbox.shadowRoot;
-    expect(sandbox.shadowRoot.innerHTML).toBe((
+    const shadowRoot = sandbox.defaultShadowHostElement.shadowRoot;
+    expect(shadowRoot.innerHTML).toBe((
       `<html>
         <head>
           ${sandboxInitStyle}
@@ -222,9 +221,8 @@ describe('sandbox mount', () => {
     const sandbox = app.activate();
     sandbox.mount(document.body);
     await sandbox.ready();
-    expect(sandbox.parent.shadowRoot).toBe(sandbox.shadowRoot);
-    const shadowRoot = sandbox.shadowRoot;
-    expect(sandbox.shadowRoot.innerHTML).toBe((
+    const shadowRoot = sandbox.defaultShadowHostElement.shadowRoot;
+    expect(shadowRoot.innerHTML).toBe((
       `<html>
         <head>
           ${sandboxInitStyle}

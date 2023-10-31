@@ -29,10 +29,10 @@ test('manager can\'t activate sandbox by un register app name', () => {
 
 test('manager activateAndMount', () => {
   const sandbox = manager.activateAndMount('app1', document.body);
-  expect(sandbox?.parent.parentNode).toBe(document.body);
+  expect(sandbox?.defaultShadowHostElement.parentNode).toBe(document.body);
   expect(sandbox?.mounted).toBe(true);
   sandbox?.unmount();
-  expect(sandbox?.parent.parentNode).toBeNull();
+  expect(sandbox?.defaultShadowHostElement.parentNode).toBeNull();
   expect(sandbox?.mounted).toBe(false);
   sandbox?.destroy();
 })
