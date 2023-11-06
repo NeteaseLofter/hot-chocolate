@@ -1,5 +1,14 @@
 # my-app
 
+## 0.1.2-beta.0
+
+### Patch Changes
+
+- Updated dependencies [7a55638]
+- Updated dependencies [2f76611]
+  - hot-chocolate@0.3.0-beta.0
+  - @hot-chocolate/plugin-dispatch@0.1.3-beta.0
+
 ## 0.1.1
 
 ### Patch Changes

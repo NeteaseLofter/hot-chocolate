@@ -1,7 +1,13 @@
 import type { Hook } from './hooks';
 
-import { createShadowDom, parserHTMLString } from '../proxy/shadow-dom';
-import type { ShadowDomHooks, HtmlScript } from '../proxy/shadow-dom';
+import {
+  SandboxShadowHostElement
+} from '../proxy/shadow-dom';
+import type {
+  ShadowDomHooks,
+  HtmlScript,
+  RemoteHtmlScript
+} from '../proxy/shadow-dom';
 import { createDocument } from '../proxy/document';
 import type { DocumentHooks } from '../proxy/document';
 import { createContentWindow } from '../proxy/window';
@@ -127,10 +133,9 @@ export interface SandboxOptions {
 export class Sandbox {
   id = `${new Date().getTime()}-${Math.round(1000 * Math.random())}`;
 
-  destroyed = false;
   mounted = false;
-  parent: Element;
-  shadowRoot: ShadowRoot;
+  destroyed = false;
+  defaultShadowHostElement: SandboxShadowHostElement;
   hooks: SandboxHooks;
   contentWindow: ProxyWindow;
   readyPromise: Promise<void>;
@@ -185,26 +190,18 @@ export class Sandbox {
 
     Reflect.set(proxyWindow, 'document', proxyDocument);
 
-    const {
-      parent,
-      shadowRoot,
-      html,
-      body,
-      head,
-      readyPromise: shadowDomReadyPromise
-    } = createShadowDom(
+
+    const defaultShadowHostElement = this.defaultShadowHostElement = new SandboxShadowHostElement(
       this,
-      hooks,
-      proxyWindow,
-      proxyDocument,
-      htmlString,
-      htmlRemote
-    );
-    this.parent = parent;
-    this.shadowRoot = shadowRoot;
-    Reflect.set(proxyDocument, 'documentElement', html);
-    Reflect.set(proxyDocument, 'head', head);
-    Reflect.set(proxyDocument, 'body', body);
+      {
+        htmlString,
+        htmlRemote
+      }
+    )
+
+    Reflect.set(proxyDocument, 'documentElement', defaultShadowHostElement.html);
+    Reflect.set(proxyDocument, 'head', defaultShadowHostElement.head);
+    Reflect.set(proxyDocument, 'body', defaultShadowHostElement.body);
 
     this.hooks.sandbox.evoke('initialization', this);
 
@@ -216,7 +213,7 @@ export class Sandbox {
     )
 
     this.readyPromise = new Promise(async (resolve) => {
-      await shadowDomReadyPromise;
+      await (defaultShadowHostElement.readyPromise);
       await this.runRemoteCodeQueue();
 
       const exCSSResources = [
@@ -280,7 +277,7 @@ export class Sandbox {
    *
    * htmlRemote, resource 资源全部加载完毕后执行
    */
-   public ready () {
+  public ready () {
     return this.readyPromise;
   }
 
@@ -323,6 +320,54 @@ export class Sandbox {
     }
     return remoteUrl;
   }
+
+  private forkedShadowHostElements = new Set<SandboxShadowHostElement>();
+  private syncedElementMap = new Map<HTMLElement, Map<SandboxShadowHostElement, HTMLElement>>();
+
+  public addForkedShadowHostElement (sandboxShadowHostElement: SandboxShadowHostElement) {
+    this.forkedShadowHostElements.add(sandboxShadowHostElement);
+    this.syncedElementMap.forEach((map, syncedElement) => {
+      const cloneElement = syncedElement.cloneNode() as typeof syncedElement
+      sandboxShadowHostElement.shadowRoot.appendChild(cloneElement);
+      map.set(sandboxShadowHostElement, syncedElement.cloneNode() as typeof syncedElement);
+    })
+  }
+  public removeForkedShadowHostElement (sandboxShadowHostElement: SandboxShadowHostElement) {
+    this.forkedShadowHostElements.delete(sandboxShadowHostElement);
+    this.syncedElementMap.forEach((map, syncedElement) => {
+      if (map.has(sandboxShadowHostElement)) {
+        const cloneElement = map.get(sandboxShadowHostElement);
+        cloneElement?.parentNode?.removeChild(cloneElement);
+        map.delete(sandboxShadowHostElement);
+      }
+    })
+  }
+
+  public addSyncedElement (syncedElement: HTMLElement) {
+    const syncedElementHostMap = new Map();
+    this.forkedShadowHostElements.forEach((sandboxShadowHostElement) => {
+      const cloneElement = syncedElement.cloneNode() as typeof syncedElement
+      sandboxShadowHostElement.shadowRoot.appendChild(cloneElement);
+      syncedElementHostMap.set(
+        sandboxShadowHostElement,
+        cloneElement
+      )
+    })
+    this.syncedElementMap.set(
+      syncedElement,
+      syncedElementHostMap
+    );
+  }
+  public removeSyncedElement (syncedElement: HTMLElement) {
+    if (this.syncedElementMap.has(syncedElement)) {
+      const syncedElementHostMap = this.syncedElementMap.get(syncedElement);
+      syncedElementHostMap?.forEach((cloneElement) => {
+        cloneElement.parentNode?.removeChild(cloneElement);
+      })
+      this.syncedElementMap.delete(syncedElement);
+    }
+  }
+
 
   public replaceCSSString (cssString: string, cssUrl?: string) {
     const {
@@ -405,9 +450,17 @@ export class Sandbox {
       return;
     }
     if (script.type === 'remote') {
-      return this.runRemoteCode(script.url, callback);
+      return this.runRemoteCode(script, callback);
     } else {
-      return this.runCode(script.content);
+      const proxyDocument = this.contentWindow.document;
+      if (script.node) {
+        Reflect.set(proxyDocument, 'currentScript', script.node);
+      }
+      const result = this.runCode(script.content);
+      if (script.node) {
+        Reflect.set(proxyDocument, 'currentScript', null);
+      }
+      return result;
     }
   }
 
@@ -415,11 +468,29 @@ export class Sandbox {
    * 通过url运行远程js脚本
    * 注意跨域问题
    */
-  public runRemoteCode (remoteScriptUrl: string, callback?: () => void) {
+  public runRemoteCode (
+    remoteScript: RemoteHtmlScript | string,
+    callback?: () => void
+  ) {
+    let remoteScriptUrl: string;
+    let remoteScriptNode: HTMLScriptElement | undefined;
+    if (typeof remoteScript === 'string') {
+      remoteScriptUrl = remoteScript;
+    } else {
+      remoteScriptUrl = remoteScript.url;
+      remoteScriptNode = remoteScript.node;
+    }
     remoteScriptUrl = this.getRemoteURLWithHtmlRoot(remoteScriptUrl);
+    const proxyDocument = this.contentWindow.document;
     return this.loadResource(remoteScriptUrl)
       .then((scriptString) => {
+        if (remoteScriptNode) {
+          Reflect.set(proxyDocument, 'currentScript', remoteScriptNode);
+        }
         this.runCode(scriptString, remoteScriptUrl);
+        if (remoteScriptNode) {
+          Reflect.set(proxyDocument, 'currentScript', null);
+        }
         callback && callback();
       }, () => {
         // fetch error：比如跨域失败
@@ -432,21 +503,20 @@ export class Sandbox {
       return;
     }
 
-    container.appendChild(
-      this.parent
-    );
+
+    container.appendChild(this.defaultShadowHostElement);
     this.mounted = true;
     this.hooks.sandbox.evoke('mount', this);
   }
 
   public unmount () {
     if (this.mounted) {
-      if (this.parent.parentNode) {
-        this.parent.parentNode.removeChild(this.parent);
+      if (this.defaultShadowHostElement.parentNode) {
+        this.defaultShadowHostElement.parentNode.removeChild(this.defaultShadowHostElement);
       }
       this.mounted = false;
-      this.hooks.sandbox.evoke('unmount', this);
     }
+    this.hooks.sandbox.evoke('unmount', this);
   }
 
   public destroy () {

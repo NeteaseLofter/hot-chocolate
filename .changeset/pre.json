@@ -1,0 +1,17 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "my-app": "0.1.1",
+    "react15": "1.0.0",
+    "react16": "1.0.0",
+    "vue2": "0.1.0",
+    "hot-chocolate": "0.2.21",
+    "@hot-chocolate/plugin-dispatch": "0.1.2",
+    "@hot-chocolate/plugin-request": "0.1.6"
+  },
+  "changesets": [
+    "gentle-buses-shave",
+    "many-kings-explain"
+  ]
+}

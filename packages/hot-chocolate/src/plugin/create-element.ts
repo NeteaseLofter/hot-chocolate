@@ -5,6 +5,9 @@ import { uniqueId } from '../utils/unique-id';
 type LoadAndRunCode = Sandbox['loadAndRunCode'];
 type LoadRemoteCSS = Sandbox['loadRemoteCSS'];
 
+const fakeScriptName = `sandbox-fake-script-${uniqueId}`;
+const fakeLinkName = `sandbox-fake-link-${uniqueId}`;
+
 export function createElementPlugin (hooks: SandboxHooks) {
   let currentSandbox: Sandbox;
   hooks.sandbox.register('beforeInitialization', (end, sandbox) => {
@@ -12,10 +15,10 @@ export function createElementPlugin (hooks: SandboxHooks) {
   })
   hooks.document.register('get', (end, proxyDocument, property, receiver, rawDocument) => {
     if (property === 'activeElement') {
-      const shadowRoot = currentSandbox.shadowRoot;
+      const shadowHostElement = currentSandbox.defaultShadowHostElement;
       let activeElement = rawDocument.activeElement;
-      if (activeElement === shadowRoot.host) {
-        activeElement = shadowRoot.activeElement;
+      if (activeElement === shadowHostElement) {
+        activeElement = shadowHostElement.shadowRoot.activeElement;
       }
       return end(activeElement);
     }
@@ -41,6 +44,14 @@ export function createElementPlugin (hooks: SandboxHooks) {
       });
     }
 
+    if (property === 'getElementsByTagName') {
+      return end.decorator((result: any) => {
+        return function (this: HTMLElement, tagName: string) {
+          return result.call(this, tagName === 'script' ? fakeScriptName : tagName);
+        }
+      })
+    }
+
     if (property === 'createElementNS') {
       return end((namespaceURI: string, type: string, ...args: any) => {
         let element;
@@ -62,7 +73,6 @@ export function createElementPlugin (hooks: SandboxHooks) {
         return element;
       });
     }
-
 
     if (property === 'createTextNode') {
       return end((text: string) => {
@@ -139,9 +149,18 @@ function modifyElementNode (
         childContainer = doc.head;
       } else {
         const doc = domParser.parseFromString(value, 'text/html');
-        allChildElements = doc.querySelectorAll('body *');
-        childContainer = doc.body;
+        if (
+          doc.body.children.length === 0
+          && doc.head.children.length !== 0
+        ) {
+          allChildElements = doc.querySelectorAll('head *');
+          childContainer = doc.head;
+        } else {
+          allChildElements = doc.querySelectorAll('body *');
+          childContainer = doc.body;
+        }
       }
+
 
       for(let i = 0; i < allChildElements.length; i++) {
         let childElement = allChildElements[i];
@@ -241,7 +260,8 @@ class FakeScriptElement extends HTMLElement {
           {
             type: 'remote',
             url: src,
-            async: !!this.getAttribute('async')
+            async: !!this.getAttribute('async'),
+            node: this as unknown as HTMLScriptElement
           },
           () => {
             if (!this.mounted) return;
@@ -257,7 +277,8 @@ class FakeScriptElement extends HTMLElement {
         this.loadAndRunCode(
           {
             type: 'local',
-            content: _self._savedContent
+            content: _self._savedContent,
+            node: this as unknown as HTMLScriptElement
           },
           () => {}
         );
@@ -275,7 +296,7 @@ class FakeScriptElement extends HTMLElement {
   }
 }
 
-const fakeScriptName = `sandbox-fake-script-${uniqueId}`;
+
 customElements.define(fakeScriptName, FakeScriptElement);
 
 function createFakeScriptElement (
@@ -480,7 +501,6 @@ class FakeLinkElement extends HTMLElement {
   }
 }
 
-const fakeLinkName = `sandbox-fake-link-${uniqueId}`;
 customElements.define(fakeLinkName, FakeLinkElement);
 
 function createFakeLinkElement (

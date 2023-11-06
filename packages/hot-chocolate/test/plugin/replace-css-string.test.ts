@@ -23,7 +23,7 @@ test(':root is replace', async () => {
   sandbox.mount(document.body);
   await sandbox.ready();
 
-  const shadowRoot = sandbox.shadowRoot;
+  const shadowRoot = sandbox.defaultShadowHostElement.shadowRoot;
   const styleElement = (shadowRoot.querySelector('#test') as HTMLStyleElement);
   expect(styleElement.innerHTML)
     .toBe(':host{color:#fff}');
@@ -41,7 +41,7 @@ test(':root from link tag is replace', async () => {
   const sandbox = app.activate();
   sandbox.mount(document.body);
   await sandbox.ready();
-  const shadowRoot = sandbox.shadowRoot;
+  const shadowRoot = sandbox.defaultShadowHostElement.shadowRoot;
   const styleElements = (shadowRoot.querySelectorAll('style'));
 
   // 加载是异步的，等待一会儿
@@ -67,7 +67,7 @@ test('font-face is replace', async () => {
   sandbox.mount(document.body);
   await sandbox.ready();
 
-  const shadowRoot = sandbox.shadowRoot;
+  const shadowRoot = sandbox.defaultShadowHostElement.shadowRoot;
   const styleElement = (shadowRoot.querySelector('#test') as HTMLStyleElement);
   expect(styleElement.innerHTML)
     .toBe('body{color:#fff;}');
@@ -90,7 +90,7 @@ test('font-face from link tag is replace', async () => {
   const sandbox = app.activate();
   sandbox.mount(document.body);
   await sandbox.ready();
-  const shadowRoot = sandbox.shadowRoot;
+  const shadowRoot = sandbox.defaultShadowHostElement.shadowRoot;
   const styleElements = (shadowRoot.querySelectorAll('style'));
 
   // 加载是异步的，等待一会儿

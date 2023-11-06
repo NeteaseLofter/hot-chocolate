@@ -109,8 +109,11 @@ export function createContentWindow (
 
   const proxyName = `proxy${getUniqueId()}`;
 
-  const runCode = (js: string, scriptSrc?: string) => {
-    var sourceString = scriptSrc ? `//# sourceURL=${scriptSrc}` : '';
+  const runCode = (
+    js: string,
+    scriptSrc?: string
+  ) => {
+    var sourceString = typeof scriptSrc === 'string' ? `//# sourceURL=${scriptSrc}` : '';
     var fn = new Function(proxyName,`with(${proxyName}){\n${js}\n${sourceString}\n}`);
     return fn.call(proxyWindow, proxyWindow);
   }

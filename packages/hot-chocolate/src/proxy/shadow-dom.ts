@@ -1,9 +1,10 @@
 import { Hook } from '../core/hooks';
+import { uniqueId } from '../utils/unique-id';
 
-import type { ProxyWindow } from './window';
 import type { ProxyDocument } from './document';
 
 import type { Sandbox } from '../core/sandbox';
+
 
 export interface ShadowDomHooks {
   shadowDom: Hook<{
@@ -21,7 +22,7 @@ interface ShadowDomResult {
   /**
    * shadow dom的外层节点
    */
-  parent: HTMLDivElement;
+  parent: HTMLElement;
   /**
    * shadow root: https://developer.mozilla.org/zh-CN/docs/Web/API/ShadowRoot
    */
@@ -49,17 +50,19 @@ interface ShadowDomResult {
   >;
 }
 
-interface LocalHtmlScript {
-  type: 'local',
-  content: string
+export interface LocalHtmlScript {
+  type: 'local';
+  content: string;
+  node?: HTMLScriptElement;
 }
-interface RemoteHtmlScript {
-  type: 'remote',
-  url: string,
-  async?: boolean
+export interface RemoteHtmlScript {
+  type: 'remote';
+  url: string;
+  async?: boolean;
+  node?: HTMLScriptElement;
 }
 
-export type HtmlScript = LocalHtmlScript|RemoteHtmlScript;
+export type HtmlScript = LocalHtmlScript | RemoteHtmlScript;
 export type HtmlLink = {
   url: string
 }
@@ -78,14 +81,13 @@ export function parserHTMLString (htmlString: string) {
 }
 
 export function createShadowDom (
+  parent: HTMLElement,
   sandbox: Sandbox,
   hooks: ShadowDomHooks,
-  proxyWindow: ProxyWindow,
   proxyDocument: ProxyDocument,
   htmlString?: string,
   htmlRemote?: string,
 ): ShadowDomResult {
-  const parent = document.createElement('div');
   const shadowRoot = parent.attachShadow({ mode: 'open' });
   parent.style.position = 'relative';
   parent.style.overflow = 'hidden';
@@ -174,3 +176,55 @@ export function createShadowDom (
   const { isEnd, result } = hooks.shadowDom.evoke('initialization', data)
   return isEnd ? result : data;
 }
+
+
+export class SandboxShadowHostElement extends HTMLElement {
+  sandbox: Sandbox;
+  html: HTMLHtmlElement;
+  head: HTMLHeadElement;
+  body: HTMLBodyElement;
+  readyPromise: ReturnType<typeof createShadowDom>['readyPromise'];
+
+  shadowRoot!: Exclude<HTMLElement['shadowRoot'], null>;
+
+  constructor (
+    sandbox: Sandbox,
+    options: {
+      htmlString?: string;
+      htmlRemote?: string;
+    } = {}
+  ) {
+    super();
+
+    this.sandbox = sandbox;
+    const {
+      html,
+      body,
+      head,
+      readyPromise
+    } = createShadowDom(
+      this,
+      sandbox,
+      sandbox.hooks,
+      sandbox.contentWindow.document,
+      options?.htmlString,
+      options?.htmlRemote
+    );
+
+    this.html = html;
+    this.head = head;
+    this.body = body;
+    this.readyPromise = readyPromise;
+  }
+
+  disconnectedCallback () {
+    this.sandbox.removeForkedShadowHostElement(this);
+  }
+  connectedCallback () {
+    this.sandbox.addForkedShadowHostElement(this);
+  }
+}
+const sandboxElementName = `sandbox-shadow-element-${uniqueId}`;
+customElements.define(sandboxElementName, SandboxShadowHostElement);
+
+

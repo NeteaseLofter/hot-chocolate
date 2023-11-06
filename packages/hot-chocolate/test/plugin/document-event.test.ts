@@ -17,5 +17,5 @@ test('get target current', () => {
   `)
 
   expect((sandbox.contentWindow as any).testBodyClickTarget)
-    .toBe(sandbox.shadowRoot.querySelector('body'));
+    .toBe(sandbox.defaultShadowHostElement.shadowRoot.querySelector('body'));
 });
