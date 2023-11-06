@@ -1,5 +1,12 @@
 # hot-chocolate
 
+## 0.3.0
+
+### Minor Changes
+
+- 7a55638: shadowRoot 创建改为 defaultShadowHostElement 对象，为后续多个 shadowRoot 做准备
+- 2f76611: 支持通过 getElementsByTagName 和 document.currentScript 获取当前的运行 script
+
 ## 0.3.0-beta.0
 
 ### Minor Changes
