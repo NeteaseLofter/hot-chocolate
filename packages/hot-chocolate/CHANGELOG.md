@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.3.1
+
+### Patch Changes
+
+- ac40d90: 修复沙箱 html 初始化顺序错误问题
+
 ## 0.3.0
 
 ### Minor Changes
