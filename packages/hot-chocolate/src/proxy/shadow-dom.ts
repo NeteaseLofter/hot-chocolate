@@ -124,8 +124,8 @@ export function createShadowDom (
     } = await parserHTML();
 
     if (defaultDom) {
-      fakeBody.innerHTML = defaultDom.body.innerHTML;
       fakeHead.innerHTML = defaultDom.head.innerHTML;
+      fakeBody.innerHTML = defaultDom.body.innerHTML;
     }
 
     // 重置 shadow 里的样式
