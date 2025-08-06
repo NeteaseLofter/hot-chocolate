@@ -1,5 +1,13 @@
 # @hot-chocolate/plugin-dispatch
 
+## 0.1.4
+
+### Patch Changes
+
+- cdae97d: dispatch 支持主应用直接调用
+- Updated dependencies [cdae97d]
+  - hot-chocolate@0.3.2
+
 ## 0.1.3
 
 ### Patch Changes

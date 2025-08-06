@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.3.2
+
+### Patch Changes
+
+- cdae97d: dispatch 支持主应用直接调用
+
 ## 0.3.1
 
 ### Patch Changes
