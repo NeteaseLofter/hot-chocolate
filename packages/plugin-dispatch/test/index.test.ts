@@ -1,8 +1,13 @@
 import { Manager, Sandbox } from 'hot-chocolate';
-import { createSandboxDispatchPlugin } from '../src/index';
+import {
+  createSandboxDispatchPlugin,
+  getSandboxExportsAfterReady,
+  getSandboxExports
+} from '../src/index';
 import {
   DISPATCH_IMPORT_KEY,
-  DISPATCH_MODULE_KEY
+  DISPATCH_MODULE_KEY,
+  DISPATCH_MODULE_EXPORTS_KEY
 } from '../src/contents';
 
 const manager = new Manager([
@@ -15,16 +20,17 @@ const manager = new Manager([
         const {
           dispatchPluginExports
         } = require('../src/export');
+        const exports = dispatchPluginExports;
 
-        dispatchPluginExports.getCustom = () => {
+        exports.getCustom = () => {
           return 'app-a-custom';
         }
 
-        dispatchPluginExports.render = (text) => {
+        exports.render = (text) => {
           return document.body.innerHTML = text;
         }
 
-        dispatchPluginExports.body = document.body;
+        exports.body = document.body;
         </script>
         </body></html>
       `
@@ -69,12 +75,18 @@ const manager = new Manager([
     hooks.window.register('get', (end, target, property) => {
       if (property === 'require') {
         return end((id: string) => {
-          (window as any)[DISPATCH_MODULE_KEY] = (sandbox.contentWindow as any)[DISPATCH_MODULE_KEY];
-          (window as any)[DISPATCH_IMPORT_KEY] = (sandbox.contentWindow as any)[DISPATCH_IMPORT_KEY];
-          const result = require(id);
-          delete (window as any)[DISPATCH_MODULE_KEY]
-          delete (window as any)[DISPATCH_IMPORT_KEY];
-          return result;
+          if (id === '../src/export') {
+            return {
+              dispatchPluginModule: (sandbox.contentWindow as any)[DISPATCH_MODULE_KEY],
+              dispatchPluginExports: (sandbox.contentWindow as any)[DISPATCH_MODULE_KEY][DISPATCH_MODULE_EXPORTS_KEY]
+            }
+          }
+          if (id === '../src/import') {
+            return {
+              dispatchPluginImport: (sandbox.contentWindow as any)[DISPATCH_IMPORT_KEY],
+            }
+          }
+          return require(id);
         });
       }
     });
@@ -82,14 +94,25 @@ const manager = new Manager([
 ])
 
 describe('plugin-dispatch', () => {
-  test('success', async () => {
-    const sandbox = await manager.activate('app-b');
+  test('import success', async () => {
+    const sandbox = await manager.activateAndMount('app-b', document.body);
     await new Promise<void>((resolve) => {
-      (sandbox?.contentWindow as any).ready = (appACustom: any, appA: any) => {
+      (sandbox?.contentWindow as any).ready = (appACustom: any, appAExports: any) => {
         expect(appACustom).toBe('app-a-custom');
-        expect(appA.body.innerHTML).toBe('appB dispatch render appA');
+        expect(appAExports.body.innerHTML).toBe('appB dispatch render appA');
         resolve();
       }
     })
+    manager.deactivateAll();
+  });
+
+  test('get exports success', async () => {
+    const sandbox = await manager.activate('app-a');
+    if (!sandbox) return;
+    sandbox.mount(document.body);
+    const exports = await getSandboxExportsAfterReady(sandbox);
+    expect(exports.getCustom()).toBe('app-a-custom');
+    expect(exports.render).toBeDefined();
+    expect(exports.body).toBe(sandbox.contentWindow.document.body);
   });
 })

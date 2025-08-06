@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "CommonJS",
+    "module": "NodeNext",
     "strict": true,
     "declaration": true,
     "moduleResolution": "node",
@@ -14,7 +14,7 @@
     "sourceMap": true,
     "lib": [
       "ESNext",
-      "DOM"
+      "DOM",
     ],
     "outDir": "lib"
   }

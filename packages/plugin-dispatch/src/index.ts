@@ -1,4 +1,7 @@
-import type { Plugin } from 'hot-chocolate';
+import type {
+  Plugin,
+  Sandbox
+} from 'hot-chocolate';
 
 import {
   DISPATCH_MODULE_KEY,
@@ -6,10 +9,21 @@ import {
   DISPATCH_IMPORT_KEY
 } from './contents';
 
+export function getSandboxExports (sandbox: Sandbox) {
+  return {
+    ...(sandbox.contentWindow as any)[DISPATCH_MODULE_KEY][DISPATCH_MODULE_EXPORTS_KEY],
+  };
+}
+
+export async function getSandboxExportsAfterReady (sandbox: Sandbox) {
+  await sandbox?.ready();
+  return getSandboxExports(sandbox);
+}
+
 export function createSandboxDispatchPlugin (): Plugin {
   return function (hooks, application, manager) {
-    const module = {
-      [DISPATCH_MODULE_EXPORTS_KEY]: {}
+    let module = {
+      [DISPATCH_MODULE_EXPORTS_KEY]: {} as any
     };
     const dispatchImport = async (
       appName: string,
@@ -20,27 +34,33 @@ export function createSandboxDispatchPlugin (): Plugin {
       } = {}
     ) => {
       if (!manager) return {};
-      const app = await manager.activate(appName);
-      if (app) {
+      const sandbox = await manager.activate(appName);
+      if (sandbox) {
         if (mountAt) {
-          app.mount(mountAt);
+          sandbox.mount(mountAt);
         }
-        await app?.ready();
+        const exports = await getSandboxExportsAfterReady(sandbox)
         return {
-          ...(app.contentWindow as any)[DISPATCH_MODULE_KEY][DISPATCH_MODULE_EXPORTS_KEY],
-          __sandbox: app
+          ...exports,
+          __sandbox: sandbox
         };
       }
       return {
-        __sandbox: app
+        __sandbox: sandbox
       };
     }
+    hooks.sandbox.register('beforeInitialization', (end, target) => {
+      module[DISPATCH_MODULE_EXPORTS_KEY].__sandboxId = target.id;
+      return undefined;
+    });
     hooks.window.register('has', (end, target, property) => {
       // 避免通过 for in 等操作被查询到
-      if (property === DISPATCH_MODULE_KEY) return end(false);
+      if (property === DISPATCH_MODULE_KEY) {
+        return end(false)
+      };
       if (property === DISPATCH_IMPORT_KEY) return end(false);
       return undefined;
-    })
+    });
     hooks.window.register('get', (end, target, property) => {
       if (property === DISPATCH_MODULE_KEY) {
         return end(module);
