@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.3.3
+
+### Patch Changes
+
+- ee7077d: 支持 table 里的内容通过 innerHTML 添加,更新 plugin-dispatch 的 ts 导出
+
 ## 0.3.2
 
 ### Patch Changes
