@@ -16,7 +16,9 @@
   "files": [
     "lib",
     "export.js",
-    "import.js"
+    "export.d.ts",
+    "import.js",
+    "import.d.ts"
   ],
   "scripts": {
     "clean": "rimraf lib",

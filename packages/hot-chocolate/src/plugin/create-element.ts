@@ -112,6 +112,44 @@ function replaceElementNode (
 
 let realConnecting = true;
 
+const tableNodes = {
+  'TABLE': {
+    getParseValue: (value: string) => `<table>${value}</table>`,
+    getAllChildElements: (doc: Document) => doc.body.querySelectorAll('table *'),
+    getChildContainer: (doc: Document) => doc.body.querySelector('table') as HTMLTableElement,
+  },
+  'TBODY': {
+    getParseValue: (value: string) => `<table><tbody>${value}</tbody></table>`,
+    getAllChildElements: (doc: Document) => doc.body.querySelectorAll('tbody *'),
+    getChildContainer: (doc: Document) => doc.body.querySelector('tbody') as HTMLTableSectionElement,
+  },
+  'THEAD': {
+    getParseValue: (value: string) => `<table><thead>${value}</thead></table>`,
+    getAllChildElements: (doc: Document) => doc.body.querySelectorAll('thead *'),
+    getChildContainer: (doc: Document) => doc.body.querySelector('thead') as HTMLTableSectionElement,
+  },
+  'TR': {
+    getParseValue: (value: string) => `<table><tbody><tr>${value}</tr></tbody></table>`,
+    getAllChildElements: (doc: Document) => doc.body.querySelectorAll('tr *'),
+    getChildContainer: (doc: Document) => doc.body.querySelector('tr') as HTMLTableRowElement,
+  },
+  'TD': {
+    getParseValue: (value: string) => `<table><tbody><tr><td>${value}</td></tr></tbody></table>`,
+    getAllChildElements: (doc: Document) => doc.body.querySelectorAll('td *'),
+    getChildContainer: (doc: Document) => doc.body.querySelector('td') as HTMLTableCellElement,
+  },
+  'TH': {
+    getParseValue: (value: string) => `<table><tbody><tr><th>${value}</th></tr></tbody></table>`,
+    getAllChildElements: (doc: Document) => doc.body.querySelectorAll('th *'),
+    getChildContainer: (doc: Document) => doc.body.querySelector('th') as HTMLTableCellElement,
+  },
+  'TFOOT': {
+    getParseValue: (value: string) => `<table><tfoot>${value}</tfoot></table>`,
+    getAllChildElements: (doc: Document) => doc.body.querySelectorAll('tfoot *'),
+    getChildContainer: (doc: Document) => doc.body.querySelector('tfoot') as HTMLTableSectionElement,
+  },
+}
+
 function modifyElementNode (
   element: Element,
   proxyDocument: ProxyDocument,
@@ -147,6 +185,14 @@ function modifyElementNode (
         doc.head.innerHTML = value;
         allChildElements = doc.querySelectorAll('head *');
         childContainer = doc.head;
+      } else if (
+        Object.keys(tableNodes).includes(element.tagName.toUpperCase())
+      ) {
+        const tableNodeTransform = tableNodes[element.tagName.toUpperCase() as keyof typeof tableNodes];
+        const currentValue = tableNodeTransform.getParseValue(value);
+        const doc = domParser.parseFromString(currentValue, 'text/html');
+        allChildElements = tableNodeTransform.getAllChildElements(doc);
+        childContainer = tableNodeTransform.getChildContainer(doc);
       } else {
         const doc = domParser.parseFromString(value, 'text/html');
         if (
@@ -182,11 +228,13 @@ function modifyElementNode (
       }
       realConnecting = true;
 
-      // element..innerHTML = '';
-      Reflect.set(prototype, 'innerHTML', '', element);
-      const childrenNodes = Array.prototype.slice.call(childContainer.childNodes, 0);
-      for(let i = 0; i < childrenNodes.length; i++) {
-        element.appendChild(childrenNodes[i]);
+      if (childContainer) {
+        // element..innerHTML = '';
+        Reflect.set(prototype, 'innerHTML', '', element);
+        const childrenNodes = Array.prototype.slice.call(childContainer.childNodes, 0);
+        for(let i = 0; i < childrenNodes.length; i++) {
+          element.appendChild(childrenNodes[i]);
+        }
       }
     }
   });
