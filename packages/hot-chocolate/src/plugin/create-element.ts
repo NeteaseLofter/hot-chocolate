@@ -301,6 +301,7 @@ class FakeScriptElement extends HTMLElement {
         !type
         || type === 'application/javascript'
         || type === 'text/javascript'
+        || type === 'module'
       )
     ) {
       if (src) {

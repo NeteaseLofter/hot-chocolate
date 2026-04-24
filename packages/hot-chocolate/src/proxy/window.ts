@@ -34,6 +34,10 @@ export interface ProxyWindow extends Window {
   __RUN_IN_SANDBOX: true
 }
 
+export interface RunCodeFunction {
+  (js: string, scriptSrc?: string, node?: HTMLScriptElement): any;
+}
+
 export function createContentWindow (
   hooks: WindowHooks,
   options?: any
@@ -109,13 +113,18 @@ export function createContentWindow (
 
   const proxyName = `proxy${getUniqueId()}`;
 
-  const runCode = (
-    js: string,
-    scriptSrc?: string
+  const runCode: RunCodeFunction = (
+    js,
+    scriptSrc,
+    node
   ) => {
+    let prevCurrentScript = proxyWindow.document.currentScript;
+    Reflect.set(proxyWindow.document, 'currentScript', node || null);
     var sourceString = typeof scriptSrc === 'string' ? `//# sourceURL=${scriptSrc}` : '';
     var fn = new Function(proxyName,`with(${proxyName}){\n${js}\n${sourceString}\n}`);
-    return fn.call(proxyWindow, proxyWindow);
+    const result = fn.call(proxyWindow, proxyWindow);
+    Reflect.set(proxyWindow.document, 'currentScript', prevCurrentScript);
+    return result;
   }
 
   return {

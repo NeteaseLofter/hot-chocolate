@@ -4,3 +4,7 @@ export type { Plugin } from './core/application';
 export { Sandbox } from './core/sandbox';
 export type { SandboxHooks } from './core/sandbox';
 export { Hook } from './core/hooks';
+export {
+  HC_DYNAMIC_IMPORT,
+  HC_DYNAMIC_MODULE_EXPORT
+} from './plugin/dynamic-import';

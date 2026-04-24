@@ -11,7 +11,7 @@ import type {
 import { createDocument } from '../proxy/document';
 import type { DocumentHooks } from '../proxy/document';
 import { createContentWindow } from '../proxy/window';
-import type { WindowHooks, ProxyWindow } from '../proxy/window';
+import type { WindowHooks, ProxyWindow, RunCodeFunction } from '../proxy/window';
 import { loadRemoteAsText } from '../utils/loader';
 import {
   resolve as urlResolve
@@ -143,7 +143,7 @@ export class Sandbox {
   htmlRemote?: string;
   onDestroy?: () => void;
 
-  runCode: (js: string, scriptSrc?: string | undefined) => any;
+  runCode: RunCodeFunction
 
   constructor (
     hooks: SandboxHooks,
@@ -452,15 +452,7 @@ export class Sandbox {
     if (script.type === 'remote') {
       return this.runRemoteCode(script, callback);
     } else {
-      const proxyDocument = this.contentWindow.document;
-      if (script.node) {
-        Reflect.set(proxyDocument, 'currentScript', script.node);
-      }
-      const result = this.runCode(script.content);
-      if (script.node) {
-        Reflect.set(proxyDocument, 'currentScript', null);
-      }
-      return result;
+      return this.runCode(script.content, undefined, script.node);
     }
   }
 
@@ -481,16 +473,9 @@ export class Sandbox {
       remoteScriptNode = remoteScript.node;
     }
     remoteScriptUrl = this.getRemoteURLWithHtmlRoot(remoteScriptUrl);
-    const proxyDocument = this.contentWindow.document;
     return this.loadResource(remoteScriptUrl)
       .then((scriptString) => {
-        if (remoteScriptNode) {
-          Reflect.set(proxyDocument, 'currentScript', remoteScriptNode);
-        }
-        this.runCode(scriptString, remoteScriptUrl);
-        if (remoteScriptNode) {
-          Reflect.set(proxyDocument, 'currentScript', null);
-        }
+        this.runCode(scriptString, remoteScriptUrl, remoteScriptNode);
         callback && callback();
       }, () => {
         // fetch error：比如跨域失败
