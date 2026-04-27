@@ -21,7 +21,7 @@ function transformStaticImportStatement (
   }
 
   const mix = t.match(
-    /^import\s+([\w$]+)\s*,\s*(\{[\s\S]*\})\s+from\s+['"][^'"]+['"]\s*;?\s*$/m
+    /^import\s+([\w$]+)\s*,\s*(\{[\s\S]*\})\s*from\s*['"][^'"]*['"]\s*;?\s*$/m
   );
   if (mix) {
     const clause = mix[2].replace(/\s+as\s+/g, ': ');
@@ -33,17 +33,17 @@ function transformStaticImportStatement (
     );
   }
 
-  const mDef = t.match(/^import\s+([\w$]+)\s+from\s+/);
+  const mDef = t.match(/^import\s+([\w$]+)\s+from\s*/);
   if (mDef) {
     return `const ${mDef[1]}=(await __hcDynamicImport(${spec}, __moduleUrl)).default;`;
   }
 
-  const mNs = t.match(/^import\s+\*\s+as\s+([\w$]+)\s+from\s+/);
+  const mNs = t.match(/^import\s+\*\s+as\s+([\w$]+)\s+from\s*/);
   if (mNs) {
     return `const ${mNs[1]}=await __hcDynamicImport(${spec}, __moduleUrl);`;
   }
 
-  const mNamed = t.match(/^import\s+(\{[\s\S]*\})\s+from\s+/);
+  const mNamed = t.match(/^import\s*(\{[\s\S]*\})\s*from\s*/);
   if (mNamed) {
     const clause = mNamed[1].replace(/\s+as\s+/g, ': ');
     return `const ${clause}=await __hcDynamicImport(${spec}, __moduleUrl);`;
