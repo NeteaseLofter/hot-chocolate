@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.3.4
+
+### Patch Changes
+
+- b5da854: 支持沙箱内 ESM 动态 import
+
 ## 0.3.3
 
 ### Patch Changes
