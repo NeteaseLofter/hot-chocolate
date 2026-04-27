@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.3.6
+
+### Patch Changes
+
+- c983d9d: 更新 esm 匹配规则
+
 ## 0.3.5
 
 ### Patch Changes
