@@ -55,7 +55,7 @@ T extends {[name: string]: { args: any[], result?: any}} = any
         }
         isEnd = true;
         result = decorator ? decorator(endResult) : endResult;
-      }) as End;
+      }) as unknown as End;
       (end as any).decorator = (newDecorator: any) => {
         decorator = newDecorator;
       }
