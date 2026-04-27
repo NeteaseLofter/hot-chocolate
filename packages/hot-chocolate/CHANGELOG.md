@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.3.5
+
+### Patch Changes
+
+- 257a332: type=module 的 script 直接启动 esm 加载
+
 ## 0.3.4
 
 ### Patch Changes
