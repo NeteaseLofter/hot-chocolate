@@ -2,6 +2,8 @@ import type { SandboxHooks, Sandbox } from '../core/sandbox';
 import type { DocumentHooks, ProxyDocument } from '../proxy/document';
 import { uniqueId } from '../utils/unique-id';
 
+import { HC_DYNAMIC_IMPORT } from './dynamic-import';
+
 type LoadAndRunCode = Sandbox['loadAndRunCode'];
 type LoadRemoteCSS = Sandbox['loadRemoteCSS'];
 
@@ -296,12 +298,30 @@ class FakeScriptElement extends HTMLElement {
     const src = this.src;
     const type = this.type;
     const _self = this;
+    if (type === 'module') {
+      this.loadAndRunCode(
+        {
+          type: 'local',
+          content: `${HC_DYNAMIC_IMPORT}(${JSON.stringify(src)})`,
+          node: this as unknown as HTMLScriptElement
+        },
+        () => {
+          if (!this.mounted) return;
+          if (src !== _self.src) return;
+          if (_self.onload) {
+            const loadEvent = new Event('load');
+            _self.onload(loadEvent);
+            _self.dispatchEvent(loadEvent);
+          }
+        }
+      );
+    }
+
     if (
       (
         !type
         || type === 'application/javascript'
         || type === 'text/javascript'
-        || type === 'module'
       )
     ) {
       if (src) {
