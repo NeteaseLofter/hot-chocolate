@@ -80,21 +80,26 @@ export function parserHTMLString (htmlString: string) {
   }
 }
 
-export function createShadowDom (
-  parent: HTMLElement,
-  sandbox: Sandbox,
-  hooks: ShadowDomHooks,
-  proxyDocument: ProxyDocument,
-  htmlString?: string,
-  htmlRemote?: string,
-): ShadowDomResult {
+export function initShadowDom (
+  parent: HTMLElement
+) {
   const shadowRoot = parent.attachShadow({ mode: 'open' });
   parent.style.position = 'relative';
   parent.style.overflow = 'hidden';
   parent.style.width = '100%';
   parent.style.height = '100%';
 
+  return shadowRoot;
+}
 
+export function createShadowDom (
+  sandbox: Sandbox,
+  hooks: ShadowDomHooks,
+  htmlString?: string,
+  htmlRemote?: string,
+): ShadowDomResult {
+  const proxyDocument = sandbox.contentWindow.document;
+  const shadowRoot = sandbox.defaultShadowHostElement.shadowRoot;
   const fakeHTML = proxyDocument.createElement('html');
   const fakeHead = proxyDocument.createElement('head');
   const fakeBody = proxyDocument.createElement('body');
@@ -165,8 +170,9 @@ export function createShadowDom (
   }
 
 
-  const data = {
-    parent,
+
+  const data: ShadowDomResult = {
+    parent: sandbox.defaultShadowHostElement,
     shadowRoot,
     head: fakeHead,
     body: fakeBody,
@@ -180,41 +186,19 @@ export function createShadowDom (
 
 export class SandboxShadowHostElement extends HTMLElement {
   sandbox: Sandbox;
-  html: HTMLHtmlElement;
-  head: HTMLHeadElement;
-  body: HTMLBodyElement;
-  readyPromise: ReturnType<typeof createShadowDom>['readyPromise'];
 
-  shadowRoot!: Exclude<HTMLElement['shadowRoot'], null>;
+  shadowRoot!: ShadowRoot;
 
   constructor (
     sandbox: Sandbox,
-    options: {
-      htmlString?: string;
-      htmlRemote?: string;
-    } = {}
   ) {
     super();
 
     this.sandbox = sandbox;
-    const {
-      html,
-      body,
-      head,
-      readyPromise
-    } = createShadowDom(
-      this,
-      sandbox,
-      sandbox.hooks,
-      sandbox.contentWindow.document,
-      options?.htmlString,
-      options?.htmlRemote
-    );
 
-    this.html = html;
-    this.head = head;
-    this.body = body;
-    this.readyPromise = readyPromise;
+    initShadowDom(
+      this
+    );
   }
 
   disconnectedCallback () {

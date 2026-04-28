@@ -3,10 +3,11 @@ import type { Hook } from './hooks';
 import {
   SandboxShadowHostElement
 } from '../proxy/shadow-dom';
-import type {
+import {
   ShadowDomHooks,
   HtmlScript,
-  RemoteHtmlScript
+  RemoteHtmlScript,
+  createShadowDom
 } from '../proxy/shadow-dom';
 import { createDocument } from '../proxy/document';
 import type { DocumentHooks } from '../proxy/document';
@@ -181,27 +182,36 @@ export class Sandbox {
     this.contentWindow = proxyWindow;
     this.runCode = runCode;
 
+    const defaultShadowHostElement = this.defaultShadowHostElement = new SandboxShadowHostElement(
+      this
+    )
+
     const {
       proxyDocument
     } = createDocument(
       hooks,
-      proxyWindow
+      proxyWindow,
+      defaultShadowHostElement.shadowRoot
     );
 
     Reflect.set(proxyWindow, 'document', proxyDocument);
 
-
-    const defaultShadowHostElement = this.defaultShadowHostElement = new SandboxShadowHostElement(
+    const {
+      html,
+      head,
+      body,
+      readyPromise
+    } = createShadowDom(
       this,
-      {
-        htmlString,
-        htmlRemote
-      }
-    )
+      hooks,
+      htmlString,
+      htmlRemote
+    );
 
-    Reflect.set(proxyDocument, 'documentElement', defaultShadowHostElement.html);
-    Reflect.set(proxyDocument, 'head', defaultShadowHostElement.head);
-    Reflect.set(proxyDocument, 'body', defaultShadowHostElement.body);
+    Reflect.set(proxyDocument, 'documentElement', html);
+    Reflect.set(proxyDocument, 'head', head);
+    Reflect.set(proxyDocument, 'body', body);
+
 
     this.hooks.sandbox.evoke('initialization', this);
 
@@ -213,7 +223,7 @@ export class Sandbox {
     )
 
     this.readyPromise = new Promise(async (resolve) => {
-      await (defaultShadowHostElement.readyPromise);
+      await (readyPromise);
       await this.runRemoteCodeQueue();
 
       const exCSSResources = [

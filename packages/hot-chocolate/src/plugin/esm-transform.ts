@@ -58,6 +58,11 @@ function stripExportKeywords (s: string): string {
     /\bexport\s+(?=(?:async\s+)?function\b|class\b|const\b|let\b|var\b)/g,
     ''
   );
+  // export { a as b }, export { x } from "m" — 仅声明 re-export，正文里删去；具体绑定由 buildExportTail 注入
+  out = out.replace(
+    /\bexport\s*\{[^}]*\}\s*(?:from\s*['"][^'"]*['"])?\s*;?/g,
+    ''
+  );
   return out;
 }
 
@@ -101,7 +106,7 @@ export async function transformEsmModuleSource (
         reps.push({
           start: imp.ss,
           end: imp.se,
-          str: `await __hcDynamicImport(${JSON.stringify(imp.n)}, __moduleUrl)`
+          str: `__hcDynamicImport(${JSON.stringify(imp.n)}, __moduleUrl)`
         });
       }
       continue;

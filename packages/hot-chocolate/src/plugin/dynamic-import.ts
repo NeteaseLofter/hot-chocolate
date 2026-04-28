@@ -53,7 +53,10 @@ function resolveModuleUrl (
     || (typeof window !== 'undefined' ? window.location.href : '');
   const isAbs = /^(\w[\w+.-]*:|\/\/|\/)/.test(specifier);
   const path = isAbs ? specifier : urlResolve(base, specifier);
-  return sandbox.getRemoteURLWithHtmlRoot(path);
+  return {
+    moduleUrl: path,
+    finalUrl: sandbox.getRemoteURLWithHtmlRoot(path)
+  };
 }
 
 function createDynamicImport (sandbox: Sandbox) {
@@ -66,7 +69,7 @@ function createDynamicImport (sandbox: Sandbox) {
     if (sandbox.destroyed) {
       return emptyNamespace();
     }
-    const finalUrl = resolveModuleUrl(sandbox, specifier, referrerUrl);
+    const { moduleUrl, finalUrl } = resolveModuleUrl(sandbox, specifier, referrerUrl);
     const cache = cacheFor(sandbox);
     let p = cache.get(finalUrl);
     if (p) {
@@ -117,7 +120,7 @@ function createDynamicImport (sandbox: Sandbox) {
       __fail(e);
     }
   })();
-})(__hcModuleDone, __hcModuleFail, ${JSON.stringify(finalUrl)});
+})(__hcModuleDone, __hcModuleFail, ${JSON.stringify(moduleUrl)});
 `;
         sandbox.runCode(wrapped, finalUrl);
         await execDone;

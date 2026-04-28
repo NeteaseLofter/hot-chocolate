@@ -35,12 +35,13 @@ export interface ProxyDocument extends Document {}
 
 export function createDocument (
   hooks: DocumentHooks,
-  contentWindow: Window
+  contentWindow: Window,
+  shadowRoot: ShadowRoot
 ) {
 
   const rawDocument = document;
 
-  const proxyDocument = new Proxy({} as any, {
+  const proxyDocument = new Proxy(shadowRoot as any, {
     has (target, property) {
       if (!rawDocument) {
         console.warn('had clean rawDocument', property)
