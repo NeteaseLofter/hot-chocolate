@@ -41,7 +41,7 @@ export function createDocument (
 
   const rawDocument = document;
 
-  const proxyDocument = new Proxy(shadowRoot as any, {
+  const proxyDocument = new Proxy({} as any, {
     has (target, property) {
       if (!rawDocument) {
         console.warn('had clean rawDocument', property)
