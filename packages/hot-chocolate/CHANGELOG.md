@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.3.7
+
+### Patch Changes
+
+- cfab176: esm 支持 export 的格式，修正 esm 加载路径，document 默认使用 shadowRoot
+
 ## 0.3.6
 
 ### Patch Changes
