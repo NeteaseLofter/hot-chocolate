@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.3.8
+
+### Patch Changes
+
+- d694fa1: 修复 element 获取和 document 代
+
 ## 0.3.7
 
 ### Patch Changes
