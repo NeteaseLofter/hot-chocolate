@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.3.9
+
+### Patch Changes
+
+- a88f54f: 增加对通过 style.textContent 设置 style 的支持
+
 ## 0.3.8
 
 ### Patch Changes
