@@ -164,6 +164,29 @@ function modifyElementNode (
 
   const prototype = Object.getPrototypeOf(element);
 
+
+  Object.defineProperty(element, 'textContent', {
+    get: () => {
+      return Reflect.get(prototype, 'textContent', element);
+    },
+    set: (value: string) => {
+      if (element.tagName.toUpperCase() === 'STYLE') {
+        Reflect.set(
+          prototype,
+          'textContent',
+          sandbox.replaceCSSString(value),
+          element
+        );
+        return;
+      }
+      Reflect.set(
+        prototype,
+        'textContent',
+        value,
+        element
+      );
+    }
+  })
   Object.defineProperty(element, 'innerHTML', {
     get: () => {
       return Reflect.get(prototype, 'innerHTML', element);

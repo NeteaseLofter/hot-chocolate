@@ -105,3 +105,76 @@ test('font-face from link tag is replace', async () => {
   expect(outStyleElement.innerHTML)
     .toBe('@font-face{font-family: "Open Sans";src: url("/remote/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),url("/remote/fonts/OpenSans-Regular-webfont.woff") format("woff");}');
 });
+
+test('style textContent: :root is replaced', async () => {
+  const app = new Application({
+    name: 'testApp',
+    sandboxOptions: {}
+  });
+
+  const sandbox = app.activate();
+  sandbox.mount(document.body);
+  await sandbox.ready();
+
+  const styleEl = sandbox.contentWindow.document.createElement('style') as HTMLStyleElement;
+  styleEl.textContent = ':root{color:#fff}';
+
+  expect(styleEl.textContent).toBe(':host{color:#fff}');
+});
+
+test('style textContent: :root is replaced on existing static style element', async () => {
+  const app = new Application({
+    name: 'testApp',
+    sandboxOptions: {
+      htmlString: '<html><head><style id="test">body{color:#000}</style></head><body></body></html>'
+    }
+  });
+
+  const sandbox = app.activate();
+  sandbox.mount(document.body);
+  await sandbox.ready();
+
+  const shadowRoot = sandbox.defaultShadowHostElement.shadowRoot;
+  const styleEl = shadowRoot.querySelector('#test') as HTMLStyleElement;
+  styleEl.textContent = ':root{color:#fff}';
+
+  expect(styleEl.textContent).toBe(':host{color:#fff}');
+});
+
+test('style textContent: font-face is replaced', async () => {
+  const app = new Application({
+    name: 'testApp',
+    sandboxOptions: {
+      htmlRoot: '/remote'
+    }
+  });
+
+  const sandbox = app.activate();
+  sandbox.mount(document.body);
+  await sandbox.ready();
+
+  const styleEl = sandbox.contentWindow.document.createElement('style') as HTMLStyleElement;
+  styleEl.textContent = '@font-face{font-family: "Open Sans";src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2");}body{color:#fff;}';
+
+  expect(styleEl.textContent).toBe('body{color:#fff;}');
+
+  const outStyleElement = document.querySelector(`style[sandbox-id="${sandbox.id}"]`) as HTMLStyleElement;
+  expect(outStyleElement.innerHTML)
+    .toBe('@font-face{font-family: "Open Sans";src: url("/remote/fonts/OpenSans-Regular-webfont.woff2") format("woff2");}');
+});
+
+test('style textContent: non-style element textContent is not replaced', async () => {
+  const app = new Application({
+    name: 'testApp',
+    sandboxOptions: {}
+  });
+
+  const sandbox = app.activate();
+  sandbox.mount(document.body);
+  await sandbox.ready();
+
+  const divEl = sandbox.contentWindow.document.createElement('div') as HTMLDivElement;
+  divEl.textContent = ':root{color:#fff}';
+
+  expect(divEl.textContent).toBe(':root{color:#fff}');
+});
