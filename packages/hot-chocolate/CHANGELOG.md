@@ -1,5 +1,11 @@
 # hot-chocolate
 
+## 0.3.10
+
+### Patch Changes
+
+- a6efd8a: 修复 script 的 load 事件触发,之前依赖于绑定 onload,现在都会发出 load 事件
+
 ## 0.3.9
 
 ### Patch Changes
