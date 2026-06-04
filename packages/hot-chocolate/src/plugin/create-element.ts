@@ -331,11 +331,11 @@ class FakeScriptElement extends HTMLElement {
         () => {
           if (!this.mounted) return;
           if (src !== _self.src) return;
+          const loadEvent = new Event('load');
           if (_self.onload) {
-            const loadEvent = new Event('load');
             _self.onload(loadEvent);
-            _self.dispatchEvent(loadEvent);
           }
+          _self.dispatchEvent(loadEvent);
         }
       );
     }
@@ -358,11 +358,11 @@ class FakeScriptElement extends HTMLElement {
           () => {
             if (!this.mounted) return;
             if (src !== _self.src) return;
+            const loadEvent = new Event('load');
             if (_self.onload) {
-              const loadEvent = new Event('load');
               _self.onload(loadEvent);
-              _self.dispatchEvent(loadEvent);
             }
+            _self.dispatchEvent(loadEvent);
           }
         );
       } else {
@@ -372,7 +372,13 @@ class FakeScriptElement extends HTMLElement {
             content: _self._savedContent,
             node: this as unknown as HTMLScriptElement
           },
-          () => {}
+          () => {
+            const loadEvent = new Event('load');
+            if (_self.onload) {
+              _self.onload(loadEvent);
+            }
+            _self.dispatchEvent(loadEvent);
+          }
         );
       }
     }
